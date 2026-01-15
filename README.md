@@ -1,6 +1,5 @@
-# project
-
-withSell Flutter project.
+# WithSell Project
+Flutter project.
 
 ## Getting Started
 
