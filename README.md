@@ -1,5 +1,5 @@
 # 위드셀 (WithSell)
-Flutter 앱 프로젝트입니다.  
+Flutter를 사용한 안드로이드 앱 프로젝트입니다.  
 Firestore를 이용해 데이터를 저장/갱신/삭제하고, REST API 호출을 통해 데이터를 동기화합니다.  
 네트워크 연결이 오프라인인 경우에도 사용할 수 있도록, 마지막으로 수신한 JSON 데이터를 SharedPreferences에 캐시로 저장합니다.
 
