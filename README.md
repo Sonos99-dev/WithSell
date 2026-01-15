@@ -1,15 +1,25 @@
-# WithSell Project
-Flutter project.
+# 위드셀 (WithSell)
+Flutter 앱 프로젝트입니다.  
+Firestore를 이용해 데이터를 저장/갱신/삭제하고, REST API 호출을 통해 데이터를 동기화합니다.  
+네트워크 연결이 불안정하거나 오프라인인 경우에도 사용할 수 있도록, 마지막으로 수신한 JSON 데이터를 SharedPreferences에 캐시로 저장합니다.
 
-## Getting Started
+## Features
+- Firestore: 데이터 저장/갱신/삭제(CRUD)
+- REST API: 단발성 호출로 데이터 조회/동기화
+- SharedPreferences: 마지막 수신 JSON 캐시(오프라인 fallback)
 
-This project is a starting point for a Flutter application.
+## Tech Stack
+- Flutter: 3.38.4 (FVM: Use)
+- Firebase: Firestore
+- Architecture: MVVM
+- Local Storage: SharedPreferences
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Data Flow (High Level)
+1. App launch
+   - SharedPreferences에서 마지막 캐시(JSON) 로드
+2. Screen entry / user action
+   - REST API 단발성 호출 → 응답 파싱
+3. On success
+   - Firestore에 저장/갱신(필요 시) + SharedPreferences 캐시 갱신
+4. Offline / failure
+   - SharedPreferences 캐시 기반으로 UI 표시(제한적 동작)
