@@ -15,11 +15,4 @@ Firestore를 이용해 데이터를 저장/갱신/삭제하고, REST API 호출�
 - Local Storage: SharedPreferences
 
 ## Data Flow (High Level)
-1. App launch
-   - SharedPreferences에서 마지막 캐시(JSON) 로드
-2. Screen entry / user action
-   - REST API 단발성 호출 → 응답 파싱
-3. On success
-   - Firestore에 저장/갱신(필요 시) + SharedPreferences 캐시 갱신
-4. Offline / failure
-   - SharedPreferences 캐시 기반으로 UI 표시(제한적 동작)
+
