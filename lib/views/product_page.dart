@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:project/viewmodels/product_view_model.dart';
+import 'package:project/views/app_color.dart';
 import 'package:provider/provider.dart';
 
 class ProductPage extends StatelessWidget {
@@ -10,7 +11,7 @@ class ProductPage extends StatelessWidget {
     try {
       hexCode = hexCode.replaceAll('#', '');
       if (hexCode.length == 6) {
-        hexCode = 'FF' + hexCode; // 불투명도 추가
+        hexCode = 'FF' + hexCode;
       }
       return Color(int.parse('0x$hexCode'));
     } catch (e) {
@@ -35,7 +36,7 @@ class ProductPage extends StatelessWidget {
             MediaQuery.of(context).orientation == Orientation.landscape
                 ? 2
                 : 1,
-            childAspectRatio: 1.8,
+            childAspectRatio: 1.6,
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
           ),
@@ -43,7 +44,8 @@ class ProductPage extends StatelessWidget {
           itemBuilder: (_, index) {
             final p = products[index];
             final quantity = vm.getQuantity(p.productNumber);
-            final totalPrice = vm.getTotalPrice(p.productNumber);
+            final totalPrice = vm.getTotalPriceWithDiscount(p.productNumber);
+            final discountAmount = vm.getDiscountAmount(p.productNumber);
             final Color borderColor = _hexToColor(p.borderColor).withOpacity(0.8);
             final Color textColor = _hexToColor(p.borderColor);
 
@@ -76,7 +78,15 @@ class ProductPage extends StatelessWidget {
                               style: TextStyle(
                                   color: textColor,
                                   fontSize: 40,
-                                  fontWeight: FontWeight.bold),
+                                  fontWeight: FontWeight.bold,
+                                shadows: [
+                                  Shadow(
+                                    offset: Offset(0, 1),
+                                    blurRadius: 2,
+                                    color: Color(0x33000000), // 검정 33% 정도
+                                  ),
+                                ],
+                              ),
                               maxLines: 3,
                             ),
                             SizedBox(height: 8),
@@ -119,6 +129,34 @@ class ProductPage extends StatelessWidget {
                               ],
                             ),
                             SizedBox(height: 10),
+                            RichText(
+                              text: TextSpan(
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: "할인 된 금액: ",
+                                    style: TextStyle(
+                                      color: Colors.grey
+                                    )
+                                  ),
+                                  TextSpan(
+                                      text: " $discountAmount",
+                                      style: TextStyle(
+                                          fontSize: 25,
+                                          color: Colors.black54
+                                      )
+                                  ),
+                                  TextSpan(
+                                      text: " 원"
+                                  )
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 5),
                             RichText(
                               text: TextSpan(
                                 style: const TextStyle(
@@ -183,7 +221,7 @@ class ProductPage extends StatelessWidget {
             width: 300,
             height: 100,
             child: FloatingActionButton.extended(
-              backgroundColor: Colors.black87,
+              backgroundColor: AppColors.mainColor,
               foregroundColor: Colors.white,
               onPressed: () {
                 _showSaveDialog(context);
@@ -250,7 +288,7 @@ class ProductPage extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      backgroundColor: Colors.black87,
+                      backgroundColor: AppColors.mainColor,
                       foregroundColor: Colors.white,
                     ),
                     onPressed: () {
@@ -262,7 +300,15 @@ class ProductPage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            offset: Offset(0, 1),
+                            blurRadius: 4,
+                            color: Color(0x55000000), // 검정 33% 정도
+                          ),
+                        ],
                       ),
+
                     ),
                   ),
                 ),

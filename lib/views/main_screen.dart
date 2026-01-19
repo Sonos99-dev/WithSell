@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:project/viewmodels/admin_view_model.dart';
 import 'package:project/viewmodels/product_view_model.dart';
 import 'package:project/views/admin_page.dart';
+import 'package:project/views/app_color.dart';
 import 'product_page.dart';
 import 'package:provider/provider.dart';
 
@@ -55,7 +56,7 @@ class _MainScreenState extends State<MainScreen> {
           hoverColor: Colors.transparent,
         ),
         child: BottomNavigationBar(
-          backgroundColor: Colors.black87,
+          backgroundColor: AppColors.mainColor,
           type: BottomNavigationBarType.fixed,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
@@ -63,6 +64,13 @@ class _MainScreenState extends State<MainScreen> {
           selectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 14,
+            shadows: [
+              Shadow(
+                offset: Offset(0, 1),
+                blurRadius: 4,
+                color: Color(0x55000000), // 검정 33% 정도
+              ),
+            ],
           ),
           selectedIconTheme: const IconThemeData(
             size: 35,
@@ -72,6 +80,13 @@ class _MainScreenState extends State<MainScreen> {
           unselectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 12,
+            shadows: [
+              Shadow(
+                offset: Offset(0, 1),
+                blurRadius: 4,
+                color: Color(0x55000000), // 검정 33% 정도
+              ),
+            ],
           ),
           unselectedIconTheme: const IconThemeData(
             size: 24,
