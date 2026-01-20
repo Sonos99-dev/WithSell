@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:project/viewmodels/product_view_model.dart';
+import 'package:project/viewmodels/sales_history_view_model.dart';
 import 'package:project/views/app_color.dart';
 import 'package:provider/provider.dart';
 
@@ -83,7 +84,7 @@ class ProductPage extends StatelessWidget {
                                   Shadow(
                                     offset: Offset(0, 1),
                                     blurRadius: 2,
-                                    color: Color(0x33000000), // 검정 33% 정도
+                                    color: Color(0x33000000),
                                   ),
                                 ],
                               ),
@@ -216,7 +217,7 @@ class ProductPage extends StatelessWidget {
       
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         floatingActionButton: Visibility(
-          visible: products.isNotEmpty,
+          visible: products.isNotEmpty && vm.getTotalCartPrice() != 0,
           child: SizedBox(
             width: 300,
             height: 100,
@@ -243,6 +244,7 @@ class ProductPage extends StatelessWidget {
 
   void _showSaveDialog(BuildContext context) {
     final vm = context.read<ProductViewModel>();
+    final int finalTotal = vm.getTotalCartPrice();
 
     showDialog(
       context: context,
@@ -266,7 +268,7 @@ class ProductPage extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "계산하시겠습니까?",
+                  "계산하기",
                   style: TextStyle(
                     fontSize: 35,
                     fontWeight: FontWeight.bold,
@@ -274,10 +276,30 @@ class ProductPage extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 20),
-                Text(
-                  "선택한 수량을 저장합니다.",
-                  style: TextStyle(fontSize: 20, color: Colors.black87),
-                  textAlign: TextAlign.center,
+                RichText(
+                  text: TextSpan(
+                    style: const TextStyle(
+                      fontSize: 25,
+                      color: Colors.black87,
+
+                    ),
+                    children: [
+                      TextSpan(
+                          text: "총 금액 "
+                      ),
+                      TextSpan(
+                          text: "$finalTotal",
+                          style: TextStyle(
+                              fontSize: 35,
+                              color: AppColors.mainColor,
+                              fontWeight: FontWeight.bold
+                          )
+                      ),
+                      TextSpan(
+                          text: " 원"
+                      )
+                    ],
+                  ),
                 ),
                 SizedBox(height: 30),
                 SizedBox(
@@ -291,12 +313,30 @@ class ProductPage extends StatelessWidget {
                       backgroundColor: AppColors.mainColor,
                       foregroundColor: Colors.white,
                     ),
-                    onPressed: () {
-                      vm.saveSelection();
-                      Navigator.pop(context);
+                    onPressed: () async {
+                      try {
+                        await vm.saveSelection();
+                        vm.clearQuantities();
+                        if (context.mounted) {
+                          context.read<SalesHistoryViewModel>().loadHistory();
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("판매 내역이 저장되었습니다."),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("저장 실패: $e"), backgroundColor: Colors.red),
+                          );
+                        }
+                      }
                     },
                     child: Text(
-                      "확인",
+                      "판매 내역 저장하기",
                       style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
@@ -304,11 +344,10 @@ class ProductPage extends StatelessWidget {
                           Shadow(
                             offset: Offset(0, 1),
                             blurRadius: 4,
-                            color: Color(0x55000000), // 검정 33% 정도
+                            color: Color(0x55000000),
                           ),
                         ],
                       ),
-
                     ),
                   ),
                 ),

@@ -2,6 +2,7 @@ import 'package:firebase_app_check/firebase_app_check.dart' show FirebaseAppChec
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:project/viewmodels/admin_view_model.dart';
+import 'package:project/viewmodels/sales_history_view_model.dart';
 import 'package:project/views/main_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -26,6 +27,9 @@ void main() async {
           ),
         ChangeNotifierProvider(
           create: (_) => AdminViewModel(productRepository),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SalesHistoryViewModel(),
         ),
       ],
       child: MaterialApp(

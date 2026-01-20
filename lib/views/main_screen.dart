@@ -3,6 +3,7 @@ import 'package:project/viewmodels/admin_view_model.dart';
 import 'package:project/viewmodels/product_view_model.dart';
 import 'package:project/views/admin_page.dart';
 import 'package:project/views/app_color.dart';
+import 'package:project/views/sales_history_page.dart';
 import 'product_page.dart';
 import 'package:provider/provider.dart';
 
@@ -31,7 +32,7 @@ class _MainScreenState extends State<MainScreen> {
   // 4개의 메뉴 리스트
   final List<Widget> _pages = [
     const ProductPage(), // 1번: 기존 상품 페이지
-    const Center(child: Text('검색')),      // 2번: 검색 (추후 분리)
+    const SalesHistoryPage(),      // 2번: 검색 (추후 분리)
     const Center(child: Text('장바구니')),    // 3번: 장바구니 (추후 분리)
     const AdminPage(),  // 4번: 마이페이지 (추후 분리)
   ];
@@ -68,7 +69,7 @@ class _MainScreenState extends State<MainScreen> {
               Shadow(
                 offset: Offset(0, 1),
                 blurRadius: 4,
-                color: Color(0x55000000), // 검정 33% 정도
+                color: Color(0x55000000),
               ),
             ],
           ),
@@ -84,7 +85,7 @@ class _MainScreenState extends State<MainScreen> {
               Shadow(
                 offset: Offset(0, 1),
                 blurRadius: 4,
-                color: Color(0x55000000), // 검정 33% 정도
+                color: Color(0x55000000),
               ),
             ],
           ),
@@ -93,7 +94,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.list_outlined), label: '상품 목록'),
-            BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: '결제 내역'),
+            BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: '판매 내역'),
             BottomNavigationBarItem(icon: Icon(Icons.calculate_rounded), label: '정산'),
             BottomNavigationBarItem(icon: Icon(Icons.manage_accounts), label: '관리자 설정'),
           ],
