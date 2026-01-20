@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SalesHistoryViewModel extends ChangeNotifier {
@@ -44,6 +45,20 @@ class SalesHistoryViewModel extends ChangeNotifier {
     _history.clear();
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('sales_history');
+    notifyListeners();
+  }
+
+  /// 특정 날짜의 모든 내역 삭제
+  Future<void> deleteHistoryByDate(String dateString) async {
+    // 해당 날짜(yyyy-MM-dd)와 일치하지 않는 데이터들만 남김
+    _history.removeWhere((item) {
+      String itemDate = DateFormat('yyyy-MM-dd').format(DateTime.parse(item['date']));
+      return itemDate == dateString;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('sales_history', jsonEncode(_history));
+
     notifyListeners();
   }
 

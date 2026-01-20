@@ -323,7 +323,6 @@ class ProductPage extends StatelessWidget {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text("판매 내역이 저장되었습니다."),
-                              behavior: SnackBarBehavior.floating,
                             ),
                           );
                         }

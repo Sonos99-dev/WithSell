@@ -38,7 +38,9 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
     final groupedData = _groupHistoryByDate(vm.history);
     final sortedDates = groupedData.keys.toList();
 
-    if (selectedDate == null && sortedDates.isNotEmpty) {
+    if (selectedDate != null && !sortedDates.contains(selectedDate)) {
+      selectedDate = sortedDates.isNotEmpty ? sortedDates.first : null;
+    } else if (selectedDate == null && sortedDates.isNotEmpty) {
       selectedDate = sortedDates.first;
     }
 
@@ -61,7 +63,7 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
           ),
           IconButton(
             icon: const Icon(Icons.delete_sweep, color: Colors.white),
-            onPressed: () => _showDeleteAllDialog(context, vm),
+            onPressed: () => _showDeleteDateDialog(context, vm, selectedDate!),
           )
         ],
       ),
@@ -84,9 +86,16 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
                   BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
                 ],
               ),
-              child: DropdownButtonHideUnderline(
+              child: sortedDates.isEmpty
+                ? const SizedBox(
+                height: 48,
+                child: Center(child: Text("기록된 날짜가 없습니다.")),
+              )
+                : DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
-                  value: selectedDate,
+                  value: (selectedDate != null && sortedDates.contains(selectedDate))
+                      ? selectedDate
+                      : (sortedDates.isNotEmpty ? sortedDates.first : null),
                   isExpanded: true,
                   icon: Icon(Icons.calendar_today, color: AppColors.mainColor),
                   style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
@@ -124,16 +133,16 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   child: ExpansionTile(
                     leading: CircleAvatar(
-                      backgroundColor: Colors.blueGrey,
+                      backgroundColor: AppColors.mainDarkColor,
                       child: Text("${record['salesNumber']}", style: const TextStyle(color: Colors.white)),
                     ),
                     title: Text(
                       "총 결제: ${record['totalAmount']}원",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text("판매 시각: ${DateFormat('HH:mm:ss').format(time)}"),
                     trailing: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.redAccent),
+                      icon: const Icon(Icons.delete_forever, size: 30, color: Colors.grey),
                       onPressed: () => _showDeleteOneDialog(context, vm, record['salesNumber']),
                     ),
                     children: [
@@ -164,13 +173,22 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text("취소")),
           TextButton(
-            onPressed: () {
-              vm.deleteHistory(salesNumber);
+            onPressed: () async {
+              // 1. 데이터 삭제 실행
+              await vm.deleteHistory(salesNumber);
+
+              // 2. 삭제 후 남아있는 데이터로 날짜 그룹 다시 계산
+              final newGroupedData = _groupHistoryByDate(vm.history);
+              final newSortedDates = newGroupedData.keys.toList();
+
               setState(() {
-                if (vm.history.isEmpty) {
-                  selectedDate = null;
+                // 3. 만약 현재 선택된 날짜에 데이터가 더 이상 없다면
+                if (!newSortedDates.contains(selectedDate)) {
+                  // 다음 우선순위 날짜로 변경 (없으면 null)
+                  selectedDate = newSortedDates.isNotEmpty ? newSortedDates.first : null;
                 }
               });
+
               Navigator.pop(context);
             },
             child: const Text("삭제", style: TextStyle(color: Colors.red)),
@@ -198,6 +216,32 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
               Navigator.pop(context);
             },
             child: const Text("전체 삭제", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 특정 날짜 삭제 확인 다이얼로그
+  void _showDeleteDateDialog(BuildContext context, SalesHistoryViewModel vm, String date) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("$date 내역 삭제"),
+        content: Text("$date의 모든 판매 기록을 삭제하시겠습니까?"),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("취소")),
+          TextButton(
+            onPressed: () async {
+              await vm.deleteHistoryByDate(date);
+              setState(() {
+                // 삭제 후 현재 날짜가 리스트에서 사라졌을 테니 selectedDate를 null로 만들어
+                // build 메서드에서 다음 최신 날짜를 잡도록 유도함
+                selectedDate = null;
+              });
+              Navigator.pop(context);
+            },
+            child: const Text("해당 날짜 삭제", style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
