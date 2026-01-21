@@ -1,36 +1,216 @@
 import 'package:flutter/material.dart';
 import 'package:project/viewmodels/admin_view_model.dart';
+import 'package:project/viewmodels/product_view_model.dart';
+import 'package:project/views/add_product_page.dart';
+import 'package:project/views/app_color.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/product_view_model.dart';
 
-class AdminPage extends StatelessWidget {
+class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
 
   @override
+  State<AdminPage> createState() => _AdminPageState();
+}
+
+class _AdminPageState extends State<AdminPage> {
+  bool _isAuthenticated = false;
+  final TextEditingController _pwController = TextEditingController();
+  final String _adminPassword = "0000"; // 초기 비밀번호
+
+  @override
+  void initState() {
+    super.initState();
+    // 페이지 진입 시 최신 목록 불러오기
+    Future.microtask(() => context.read<AdminViewModel>().loadFromLocal());
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // 1. 비밀번호 인증 전 화면
+    if (!_isAuthenticated) {
+      return _buildAuthView();
+    }
+
+    // 2. 인증 후 관리자 화면
+    final adminVm = context.watch<AdminViewModel>();
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.black, foregroundColor: Colors.white),
-          onPressed: () async {
-            try {
-              // 1. 동기화 실행
-              final updatedList = await context.read<AdminViewModel>().syncAndSave();
-              // 2. 상품 화면 ViewModel에 데이터 전달
-              context.read<ProductViewModel>().setProducts(updatedList);
+      appBar: AppBar(
+        title: const Text("관리자 모드",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: AppColors.mainColor,
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () => setState(() => _isAuthenticated = false),
+          )
+        ],
+      ),
+      body: adminVm.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            color: Colors.grey[100],
+            child: Text(
+              "등록된 상품 총 ${adminVm.products.length}개",
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(child: _buildProductList(adminVm)),
+        ],
+      ),
+      // 플로팅 버튼 영역: 상품 추가 페이지 이동 & 동기화
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            heroTag: "add_page",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AddProductPage()),
+              );
+            },
+            backgroundColor: Colors.orangeAccent,
+            icon: const Icon(Icons.add, color: Colors.white),
+            label: const Text("새 상품 등록", style: TextStyle(color: Colors.white)),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton.extended(
+            heroTag: "sync_data",
+            onPressed: () async {
+              await adminVm.syncAndSave();
+              // 메인 화면 ViewModel도 최신화
+              if (context.mounted) {
+                context.read<ProductViewModel>().setProducts(adminVm.products);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("서버와 동기화되었습니다.")),
+                );
+              }
+            },
+            backgroundColor: AppColors.mainColor,
+            icon: const Icon(Icons.sync, color: Colors.white),
+            label: const Text("목록 동기화", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("업데이트 완료")),
-              );
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("업데이트 실패")),
-              );
-            }
-          },
-          child: const Text("상품 목록 불러오기"),
+  // 비밀번호 입력 화면
+  Widget _buildAuthView() {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("관리자 인증", style: TextStyle(color: Colors.white)),
+        backgroundColor: AppColors.mainColor,
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.lock_outline, size: 80, color: Colors.grey),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _pwController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: "관리자 비밀번호",
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.password),
+                ),
+                keyboardType: TextInputType.number,
+                onSubmitted: (_) => _checkPassword(),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _checkPassword,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.mainColor,
+                  minimumSize: const Size(double.infinity, 55),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text("접속하기", style: TextStyle(color: Colors.white, fontSize: 18)),
+              )
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  void _checkPassword() {
+    if (_pwController.text == _adminPassword) {
+      setState(() => _isAuthenticated = true);
+      _pwController.clear();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("비밀번호가 일치하지 않습니다."), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  // 상품 리스트 뷰
+  Widget _buildProductList(AdminViewModel vm) {
+    if (vm.products.isEmpty) {
+      return const Center(child: Text("상품이 없습니다. 동기화 버튼을 눌러보세요."));
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: vm.products.length,
+      separatorBuilder: (context, index) => const Divider(),
+      itemBuilder: (context, index) {
+        final p = vm.products[index];
+        return ListTile(
+          leading: Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey[300]!),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(color: Colors.black,)
+            ),
+          ),
+          title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: Text("기본가: ${p.price}원 / 할인: ${p.discountPrice}원"),
+          trailing: IconButton(
+            icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+            onPressed: () => _showDeleteConfirm(context, vm, p.productNumber, p.name),
+          ),
+        );
+      },
+    );
+  }
+
+  // 삭제 확인 다이얼로그
+  void _showDeleteConfirm(BuildContext context, AdminViewModel vm, int id, String name) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("상품 삭제"),
+        content: Text("'$name' 상품을 영구 삭제하시겠습니까?"),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("취소")),
+          TextButton(
+            onPressed: () async {
+              await vm.deleteProduct(id);
+              if (context.mounted) {
+                context.read<ProductViewModel>().setProducts(vm.products);
+                Navigator.pop(context);
+              }
+            },
+            child: const Text("삭제", style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

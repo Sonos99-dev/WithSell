@@ -190,23 +190,7 @@ class ProductPage extends StatelessWidget {
                     // img
                     Expanded(
                       flex: 1,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: p.imgUrl.isNotEmpty
-                            ? Image.network(
-                          p.imgUrl,
-                          fit: BoxFit.cover,
-                        )
-                            : Container(
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(Icons.image,
-                              size: 50, color: Colors.grey[600]),
-                        ),
-                      ),
+                      child: Container(color: Colors.black,),
                     ),
                   ],
                 ),

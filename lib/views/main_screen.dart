@@ -20,13 +20,8 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() async {
-      if (!mounted) return;
-      final localData = await context.read<AdminViewModel>().loadFromLocal();
-      if (!mounted) return;
-      if (localData.isNotEmpty) {
-        context.read<ProductViewModel>().setProducts(localData);
-      }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AdminViewModel>().loadFromLocal();
     });
   }
   // 4개의 메뉴 리스트
