@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:project/models/product_model.dart'; // 모델 임포트 추가
 import 'package:project/viewmodels/admin_view_model.dart';
 import 'package:project/views/app_color.dart';
 import 'package:provider/provider.dart';
 
 class AddProductPage extends StatefulWidget {
-  const AddProductPage({super.key});
+  final ProductModel? product; // 수정 시 데이터를 받기 위한 변수 추가
+
+  const AddProductPage({super.key, this.product});
 
   @override
   State<AddProductPage> createState() => _AddProductPageState();
@@ -13,14 +16,48 @@ class AddProductPage extends StatefulWidget {
 
 class _AddProductPageState extends State<AddProductPage> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _colorController = TextEditingController(text: "#000000");
-  final _discountPriceController = TextEditingController();
-  final _discountQuantityController = TextEditingController();
+
+  // 수정 여부 판단 변수
+  bool get isEditing => widget.product != null;
+
+  late TextEditingController _nameController;
+  late TextEditingController _priceController;
+  late TextEditingController _colorController;
+  late TextEditingController _discountPriceController;
+  late TextEditingController _discountQuantityController;
 
   Color _selectedColor = Colors.red;
-  bool _isDiscountEnabled = false; // 할인 설정 여부 상태 변수
+  bool _isDiscountEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 1. 컨트롤러 및 초기값 설정 (수정 모드일 경우 기존 데이터 채우기)
+    _nameController = TextEditingController(text: widget.product?.name ?? "");
+    _priceController = TextEditingController(text: widget.product?.price.toString() ?? "");
+    _colorController = TextEditingController(text: widget.product?.borderColor ?? "#000000");
+    _discountPriceController = TextEditingController(
+        text: isEditing ? widget.product?.discountPrice.toString() : "");
+    _discountQuantityController = TextEditingController(
+        text: isEditing ? widget.product?.discountQuantity.toString() : "");
+
+    // 2. 초기 색상 및 할인 체크박스 상태 설정
+    if (isEditing) {
+      _selectedColor = _hexToColor(widget.product!.borderColor);
+      // 할인가가 0보다 크면 체크박스 활성화로 간주
+      _isDiscountEnabled = widget.product!.discountQuantity > 0;
+    }
+  }
+
+  // 헥사코드를 Color 객체로 변환
+  Color _hexToColor(String hex) {
+    try {
+      return Color(int.parse(hex.replaceFirst('#', 'FF'), radix: 16));
+    } catch (e) {
+      return Colors.red;
+    }
+  }
 
   void _pickColor() {
     showDialog(
@@ -53,7 +90,9 @@ class _AddProductPageState extends State<AddProductPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("새 상품 등록", style: TextStyle(color: Colors.white)),
+        // 제목 동적 변경
+        title: Text(isEditing ? "상품 정보 수정" : "새 상품 등록",
+            style: const TextStyle(color: Colors.white)),
         backgroundColor: AppColors.mainColor,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -67,7 +106,6 @@ class _AddProductPageState extends State<AddProductPage> {
               _buildTextField(_nameController, "상품명", Icons.shopping_bag),
               _buildTextField(_priceController, "기본 가격", Icons.attach_money, isNumber: true),
 
-              // 테두리 색상 선택
               GestureDetector(
                 onTap: _pickColor,
                 child: AbsorbPointer(
@@ -91,7 +129,6 @@ class _AddProductPageState extends State<AddProductPage> {
 
               const Divider(height: 30),
 
-              // 할인 설정 체크박스
               Row(
                 children: [
                   Checkbox(
@@ -111,11 +148,10 @@ class _AddProductPageState extends State<AddProductPage> {
                 ],
               ),
 
-              // 체크박스 클릭 시에만 필드 노출
               if (_isDiscountEnabled) ...[
                 const SizedBox(height: 10),
                 _buildTextField(_discountQuantityController, "할인 적용 개수 (예: 3)", Icons.onetwothree, isNumber: true),
-                _buildTextField(_discountPriceController, "할인 시 개당 가격", Icons.discount, isNumber: true),
+                _buildTextField(_discountPriceController, "갯수 충족시 할인 금액 (예: 1000)", Icons.discount, isNumber: true),
               ],
 
               const SizedBox(height: 30),
@@ -125,7 +161,9 @@ class _AddProductPageState extends State<AddProductPage> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: AppColors.mainColor),
                   onPressed: _submitForm,
-                  child: const Text("상품 등록하기", style: TextStyle(color: Colors.white, fontSize: 18)),
+                  // 버튼 텍스트 동적 변경
+                  child: Text(isEditing ? "수정 완료하기" : "상품 등록하기",
+                      style: const TextStyle(color: Colors.white, fontSize: 18)),
                 ),
               ),
             ],
@@ -147,7 +185,6 @@ class _AddProductPageState extends State<AddProductPage> {
           border: const OutlineInputBorder(),
         ),
         keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-        // 할인 필드가 아닐 때만 필수값 검사 (할인 필드는 선택 사항이므로 validator 제외 혹은 조건부 적용)
         validator: (value) {
           if (!_isDiscountEnabled && (controller == _discountPriceController || controller == _discountQuantityController)) {
             return null;
@@ -163,7 +200,6 @@ class _AddProductPageState extends State<AddProductPage> {
     if (_formKey.currentState!.validate()) {
       final adminVm = context.read<AdminViewModel>();
 
-      // 할인 설정이 꺼져있거나 입력이 비어있으면 0으로 처리
       int dPrice = 0;
       int dQty = 0;
 
@@ -172,18 +208,43 @@ class _AddProductPageState extends State<AddProductPage> {
         dQty = int.tryParse(_discountQuantityController.text) ?? 0;
       }
 
-      await adminVm.addProduct(
-        name: _nameController.text,
-        price: int.parse(_priceController.text),
-        borderColor: _colorController.text,
-        discountPrice: dPrice,
-        discountQuantity: dQty,
-      );
+      if (isEditing) {
+        // [수정 모드]: updateProduct 호출
+        await adminVm.updateProduct(
+          productNumber: widget.product!.productNumber,
+          name: _nameController.text,
+          price: int.parse(_priceController.text),
+          borderColor: _colorController.text,
+          discountPrice: dPrice,
+          discountQuantity: dQty,
+        );
+      } else {
+        // [등록 모드]: addProduct 호출
+        await adminVm.addProduct(
+          name: _nameController.text,
+          price: int.parse(_priceController.text),
+          borderColor: _colorController.text,
+          discountPrice: dPrice,
+          discountQuantity: dQty,
+        );
+      }
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("상품이 성공적으로 등록되었습니다.")));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(isEditing ? "상품이 수정되었습니다." : "상품이 성공적으로 등록되었습니다."))
+        );
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _priceController.dispose();
+    _colorController.dispose();
+    _discountPriceController.dispose();
+    _discountQuantityController.dispose();
+    super.dispose();
   }
 }

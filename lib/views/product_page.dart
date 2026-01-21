@@ -31,7 +31,12 @@ class ProductPage extends StatelessWidget {
         body: products.isEmpty
             ? Center(child: Text("상품이 없습니다.\n관리자 페이지를 통해 상품을 등록하고 불러와 보세요", style: TextStyle(fontSize: 30, color: Colors.black87), textAlign: TextAlign.center,))
             : GridView.builder(
-          padding: EdgeInsets.all(12),
+          padding: EdgeInsets.only(
+            top: 30,
+            left: 12,
+            right: 12,
+            bottom: 70,
+          ),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount:
             MediaQuery.of(context).orientation == Orientation.landscape

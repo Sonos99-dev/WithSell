@@ -76,12 +76,12 @@ class _AdminPageState extends State<AdminPage> {
           Expanded(child: _buildProductList(adminVm)),
         ],
       ),
-      floatingActionButton: Column(
+      floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           SizedBox(
-            width: 200,
-            height: 80,
+            width: 220,
+            height: 90,
             child: FloatingActionButton.extended(
               heroTag: "add_page",
               onPressed: () {
@@ -91,14 +91,14 @@ class _AdminPageState extends State<AdminPage> {
                 );
               },
               backgroundColor: Colors.orangeAccent,
-              icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text("새 상품 등록", style: TextStyle(color: Colors.white)),
+              icon: const Icon(Icons.add, color: Colors.white, size: 40,),
+              label: const Text("새 상품 등록", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(width: 12),
           SizedBox(
-            width: 200,
-            height: 80,
+            width: 220,
+            height: 90,
             child: FloatingActionButton.extended(
               heroTag: "sync_data",
               onPressed: () async {
@@ -111,8 +111,8 @@ class _AdminPageState extends State<AdminPage> {
                 }
               },
               backgroundColor: AppColors.mainColor,
-              icon: const Icon(Icons.sync, color: Colors.white),
-              label: const Text("목록 동기화", style: TextStyle(color: Colors.white)),
+              icon: const Icon(Icons.sync, color: Colors.white, size: 40),
+              label: const Text("목록 동기화", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
             ),
           ),
         ],
@@ -180,7 +180,12 @@ class _AdminPageState extends State<AdminPage> {
       return const Center(child: Text("상품이 없습니다. 동기화 버튼을 눌러보세요."));
     }
     return ListView.separated(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: 100,
+      ),
       itemCount: vm.products.length,
       separatorBuilder: (context, index) => const Divider(),
       itemBuilder: (context, index) {
