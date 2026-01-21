@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:project/viewmodels/admin_view_model.dart';
+import 'package:flutter/material.dart';import 'package:project/viewmodels/admin_view_model.dart';
 import 'package:project/viewmodels/product_view_model.dart';
 import 'package:project/views/add_product_page.dart';
 import 'package:project/views/app_color.dart';
@@ -16,6 +15,19 @@ class _AdminPageState extends State<AdminPage> {
   bool _isAuthenticated = false;
   final TextEditingController _pwController = TextEditingController();
   final String _adminPassword = "0000"; // 초기 비밀번호
+
+  // 헥사코드를 컬러로 변환하는 헬퍼 함수
+  Color _hexToColor(String hexCode) {
+    try {
+      hexCode = hexCode.replaceAll('#', '');
+      if (hexCode.length == 6) {
+        hexCode = 'FF$hexCode';
+      }
+      return Color(int.parse('0x$hexCode'));
+    } catch (e) {
+      return Colors.grey;
+    }
+  }
 
   @override
   void initState() {
@@ -57,45 +69,51 @@ class _AdminPageState extends State<AdminPage> {
             padding: const EdgeInsets.all(16),
             color: Colors.grey[100],
             child: Text(
-              "등록된 상품 총 ${adminVm.products.length}개",
+              "등록된 상품 총 ${adminVm.products.length}개 (클릭하여 수정)",
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
           Expanded(child: _buildProductList(adminVm)),
         ],
       ),
-      // 플로팅 버튼 영역: 상품 추가 페이지 이동 & 동기화
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          FloatingActionButton.extended(
-            heroTag: "add_page",
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AddProductPage()),
-              );
-            },
-            backgroundColor: Colors.orangeAccent,
-            icon: const Icon(Icons.add, color: Colors.white),
-            label: const Text("새 상품 등록", style: TextStyle(color: Colors.white)),
+          SizedBox(
+            width: 200,
+            height: 80,
+            child: FloatingActionButton.extended(
+              heroTag: "add_page",
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddProductPage()),
+                );
+              },
+              backgroundColor: Colors.orangeAccent,
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text("새 상품 등록", style: TextStyle(color: Colors.white)),
+            ),
           ),
           const SizedBox(height: 12),
-          FloatingActionButton.extended(
-            heroTag: "sync_data",
-            onPressed: () async {
-              await adminVm.syncAndSave();
-              // 메인 화면 ViewModel도 최신화
-              if (context.mounted) {
-                context.read<ProductViewModel>().setProducts(adminVm.products);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("서버와 동기화되었습니다.")),
-                );
-              }
-            },
-            backgroundColor: AppColors.mainColor,
-            icon: const Icon(Icons.sync, color: Colors.white),
-            label: const Text("목록 동기화", style: TextStyle(color: Colors.white)),
+          SizedBox(
+            width: 200,
+            height: 80,
+            child: FloatingActionButton.extended(
+              heroTag: "sync_data",
+              onPressed: () async {
+                await adminVm.syncAndSave();
+                if (context.mounted) {
+                  context.read<ProductViewModel>().setProducts(adminVm.products);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("서버와 동기화되었습니다.")),
+                  );
+                }
+              },
+              backgroundColor: AppColors.mainColor,
+              icon: const Icon(Icons.sync, color: Colors.white),
+              label: const Text("목록 동기화", style: TextStyle(color: Colors.white)),
+            ),
           ),
         ],
       ),
@@ -167,21 +185,32 @@ class _AdminPageState extends State<AdminPage> {
       separatorBuilder: (context, index) => const Divider(),
       itemBuilder: (context, index) {
         final p = vm.products[index];
+        final Color themeColor = _hexToColor(p.borderColor);
+
         return ListTile(
+          onTap: () {
+            // 상품 클릭 시 수정 페이지로 이동하며 기존 데이터 전달
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddProductPage(product: p),
+              ),
+            );
+          },
           leading: Container(
             width: 50,
             height: 50,
             decoration: BoxDecoration(
+              color: themeColor,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.grey[300]!),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Container(color: Colors.black,)
+            child: const Center(
+              child: Icon(Icons.edit, color: Colors.white, size: 20),
             ),
           ),
           title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-          subtitle: Text("기본가: ${p.price}원 / 할인: ${p.discountPrice}원"),
+          subtitle: Text("기본가: ${p.price}원 / ${p.discountQuantity}개 구매 시 ${p.discountPrice}원 할인 적용중"),
           trailing: IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
             onPressed: () => _showDeleteConfirm(context, vm, p.productNumber, p.name),
@@ -204,6 +233,7 @@ class _AdminPageState extends State<AdminPage> {
             onPressed: () async {
               await vm.deleteProduct(id);
               if (context.mounted) {
+                // 삭제 후 메인 화면 데이터 갱신
                 context.read<ProductViewModel>().setProducts(vm.products);
                 Navigator.pop(context);
               }

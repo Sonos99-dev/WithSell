@@ -91,4 +91,31 @@ class AdminViewModel extends ChangeNotifier {
       _setLoading(false);
     }
   }
+
+  // 상품 수정 (기존 번호를 그대로 사용하여 덮어씌움)
+  Future<void> updateProduct({
+    required int productNumber,
+    required String name,
+    required int price,
+    required String borderColor,
+    required int discountPrice,
+    required int discountQuantity,
+  }) async {
+    _setLoading(true);
+    try {
+      final updatedProduct = ProductModel(
+        productNumber: productNumber,
+        name: name,
+        price: price,
+        borderColor: borderColor,
+        discountPrice: discountPrice,
+        discountQuantity: discountQuantity,
+      );
+
+      await _repo.postProduct(updatedProduct);
+      await syncAndSave(); // 로컬 및 UI 동기화
+    } finally {
+      _setLoading(false);
+    }
+  }
 }
