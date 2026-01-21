@@ -214,7 +214,7 @@ class ProductPage extends StatelessWidget {
               backgroundColor: AppColors.mainColor,
               foregroundColor: Colors.white,
               onPressed: () {
-                _showSaveDialog(context);
+                _showPaymentMethodDialog(context);
               },
               label: Text(
                 "계산하기",
@@ -231,7 +231,80 @@ class ProductPage extends StatelessWidget {
     );
   }
 
-  void _showSaveDialog(BuildContext context) {
+  void _showPaymentMethodDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text("결제 수단 선택",
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text("결제하실 방법을 선택해주세요.", style: TextStyle(fontSize: 20)),
+              const SizedBox(height: 30),
+              Row(
+                children: [
+                  // 현금 선택 버튼
+                  Expanded(
+                    child: SizedBox(
+                      height: 120,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context); // 현재 창 닫기
+                          _showSaveDialog(context, "cash"); // 다음 다이얼로그로 결제수단 전달
+                        },
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.money, size: 40, color: Colors.white),
+                            Text("현금", style: TextStyle(fontSize: 25, color: Colors.white, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  // 카드 선택 버튼
+                  Expanded(
+                    child: SizedBox(
+                      height: 120,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context); // 현재 창 닫기
+                          _showSaveDialog(context, "card"); //
+                        },
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.credit_card, size: 40, color: Colors.white),
+                            Text("카드", style: TextStyle(fontSize: 25, color: Colors.white, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSaveDialog(BuildContext context, String paymentMethod) {
     final vm = context.read<ProductViewModel>();
     final int finalTotal = vm.getTotalCartPrice();
 
