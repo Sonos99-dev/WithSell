@@ -62,47 +62,24 @@ class SalesHistoryViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 목업
-  Future<void> injectMockData() async {
-    final prefs = await SharedPreferences.getInstance();
+  Future<void> updateCancelStatus(int salesNumber, bool isCanceled) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final index = _history.indexWhere((item) => item['salesNumber'] == salesNumber);
 
-    // 서로 다른 3일간의 데이터 생성
-    List<Map<String, dynamic>> mockHistory = [
-      // 1. 오늘 데이터
-      {
-        'id': 1001,
-        'salesNumber': 3,
-        'totalAmount': 15000,
-        'date': DateTime.now().toIso8601String(),
-        'items': [
-          {'name': '상품 A', 'quantity': 2, 'totalPrice': 10000},
-          {'name': '상품 B', 'quantity': 1, 'totalPrice': 5000},
-        ]
-      },
-      // 2. 어제 데이터
-      {
-        'id': 1002,
-        'salesNumber': 2,
-        'totalAmount': 20000,
-        'date': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
-        'items': [
-          {'name': '상품 C', 'quantity': 4, 'totalPrice': 20000},
-        ]
-      },
-      // 3. 그저께 데이터
-      {
-        'id': 1003,
-        'salesNumber': 1,
-        'totalAmount': 8000,
-        'date': DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
-        'items': [
-          {'name': '상품 A', 'quantity': 1, 'totalPrice': 5000},
-          {'name': '상품 D', 'quantity': 1, 'totalPrice': 3000},
-        ]
+      if (index != -1) {
+        Map<String, dynamic> updatedRecord = Map<String, dynamic>.from(_history[index]);
+        updatedRecord['isCanceled'] = isCanceled;
+
+        _history[index] = updatedRecord;
+
+        String jsonString = jsonEncode(_history);
+        await prefs.setString('sales_history', jsonString);
+
+        notifyListeners();
       }
-    ];
-
-    await prefs.setString('sales_history', jsonEncode(mockHistory));
-    await loadHistory(); // 화면 갱신을 위해 다시 로드
+    } catch (e) {
+      debugPrint("결제 취소 중 오류 발생: $e");
+    }
   }
 }

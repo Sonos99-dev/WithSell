@@ -89,6 +89,7 @@ class ProductViewModel extends ChangeNotifier {
         'price': p.price,
         'totalPrice': getTotalPriceWithDiscount(p.productNumber),
         'isCardPayment': isCardPayment,
+        'isCanceled': false,
         'timestamp': DateTime.now().toIso8601String(),
       })
           .toList();
