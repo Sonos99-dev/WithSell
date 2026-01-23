@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:project/viewmodels/admin_view_model.dart';
 import 'package:project/viewmodels/product_view_model.dart';
 import 'package:project/views/admin_page.dart';
+import 'package:project/views/app_color.dart';
+import 'package:project/views/sales_history_page.dart';
 import 'product_page.dart';
 import 'package:provider/provider.dart';
 
@@ -18,19 +20,14 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() async {
-      if (!mounted) return;
-      final localData = await context.read<AdminViewModel>().loadFromLocal();
-      if (!mounted) return;
-      if (localData.isNotEmpty) {
-        context.read<ProductViewModel>().setProducts(localData);
-      }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AdminViewModel>().loadFromLocal();
     });
   }
   // 4개의 메뉴 리스트
   final List<Widget> _pages = [
     const ProductPage(), // 1번: 기존 상품 페이지
-    const Center(child: Text('검색')),      // 2번: 검색 (추후 분리)
+    const SalesHistoryPage(),      // 2번: 검색 (추후 분리)
     const Center(child: Text('장바구니')),    // 3번: 장바구니 (추후 분리)
     const AdminPage(),  // 4번: 마이페이지 (추후 분리)
   ];
@@ -55,7 +52,7 @@ class _MainScreenState extends State<MainScreen> {
           hoverColor: Colors.transparent,
         ),
         child: BottomNavigationBar(
-          backgroundColor: Colors.black87,
+          backgroundColor: AppColors.mainColor,
           type: BottomNavigationBarType.fixed,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
@@ -63,6 +60,13 @@ class _MainScreenState extends State<MainScreen> {
           selectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 14,
+            shadows: [
+              Shadow(
+                offset: Offset(0, 1),
+                blurRadius: 4,
+                color: Color(0x55000000),
+              ),
+            ],
           ),
           selectedIconTheme: const IconThemeData(
             size: 35,
@@ -72,13 +76,20 @@ class _MainScreenState extends State<MainScreen> {
           unselectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 12,
+            shadows: [
+              Shadow(
+                offset: Offset(0, 1),
+                blurRadius: 4,
+                color: Color(0x55000000),
+              ),
+            ],
           ),
           unselectedIconTheme: const IconThemeData(
             size: 24,
           ),
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.list_outlined), label: '상품 목록'),
-            BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: '결제 내역'),
+            BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: '판매 내역'),
             BottomNavigationBarItem(icon: Icon(Icons.calculate_rounded), label: '정산'),
             BottomNavigationBarItem(icon: Icon(Icons.manage_accounts), label: '관리자 설정'),
           ],

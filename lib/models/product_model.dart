@@ -1,7 +1,6 @@
 class ProductModel {
   final int discountPrice;
   final int discountQuantity;
-  final String imgUrl;
   final String name;
   final int price;
   final int productNumber;
@@ -10,7 +9,6 @@ class ProductModel {
   const ProductModel({
     required this.discountPrice,
     required this.discountQuantity,
-    required this.imgUrl,
     required this.name,
     required this.price,
     required this.productNumber,
@@ -20,39 +18,36 @@ class ProductModel {
   //
   factory ProductModel.fromFirestore(Map<String, dynamic> data) {
     return ProductModel(
-      discountPrice: data['discount_price'] ?? 0,
-      discountQuantity: data['discount_quantity'] ?? 0,
-      imgUrl: data['img_url'] ?? '',
+      discountPrice: data['discountPrice'] ?? 0,
+      discountQuantity: data['discountQuantity'] ?? 0,
       name: data['name'] ?? '',
       price: data['price'] ?? 0,
-      productNumber: data['product_number'] ?? 0,
-      borderColor: data['border_color'] ?? '',
+      productNumber: data['productNumber'] ?? 0,
+      borderColor: data['borderColor'] ?? '',
     );
   }
 
   // JSON → Model
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
-      discountPrice: json['discount_price'] ?? 0,
-      discountQuantity: json['discount_quantity'] ?? 0,
-      imgUrl: json['img_url'] ?? '',
+      discountPrice: json['discountPrice'] ?? 0,
+      discountQuantity: json['discountQuantity'] ?? 0,
       name: json['name'] ?? '',
       price: json['price'] ?? 0,
-      productNumber: json['product_number'] ?? 0,
-      borderColor: json['border_color'] ?? '',
+      productNumber: json['productNumber'] ?? 0,
+      borderColor: json['borderColor'] ?? '',
     );
   }
 
   // Model → JSON
   Map<String, dynamic> toJson() {
     return {
-      "discount_price": discountPrice,
-      "discount_quantity": discountQuantity,
-      "img_url": imgUrl,
+      "discountPrice": discountPrice,
+      "discountQuantity": discountQuantity,
       "name": name,
       "price": price,
-      "product_number": productNumber,
-      "border_color": borderColor,
+      "productNumber": productNumber,
+      "borderColor": borderColor,
     };
   }
 
@@ -62,7 +57,6 @@ class ProductModel {
   ProductModel copyWith({
     int? discountPrice,
     int? discountQuantity,
-    String? imgUrl,
     String? name,
     int? price,
     int? productNumber,
@@ -71,7 +65,6 @@ class ProductModel {
     return ProductModel(
       discountPrice: discountPrice ?? this.discountPrice,
       discountQuantity: discountQuantity ?? this.discountQuantity,
-      imgUrl: imgUrl ?? this.imgUrl,
       name: name ?? this.name,
       price: price ?? this.price,
       productNumber: productNumber ?? this.productNumber,
