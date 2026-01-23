@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:project/viewmodels/product_view_model.dart';
 import 'package:project/viewmodels/sales_history_view_model.dart';
 import 'package:project/views/app_color.dart';
@@ -191,7 +192,7 @@ class ProductPage extends StatelessWidget {
                         ),
                       ),
                     ),
-      
+
                     // img
                     Expanded(
                       flex: 1,
@@ -234,188 +235,316 @@ class ProductPage extends StatelessWidget {
   void _showPaymentMethodDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text("결제 수단 선택",
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text("결제하실 방법을 선택해주세요.", style: TextStyle(fontSize: 20)),
-              const SizedBox(height: 30),
-              Row(
-                children: [
-                  // 현금 선택 버튼
-                  Expanded(
-                    child: SizedBox(
-                      height: 120,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context); // 현재 창 닫기
-                          _showSaveDialog(context, "cash"); // 다음 다이얼로그로 결제수단 전달
-                        },
-                        child: const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.money, size: 40, color: Colors.white),
-                            Text("현금", style: TextStyle(fontSize: 25, color: Colors.white, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 15),
-                  // 카드 선택 버튼
-                  Expanded(
-                    child: SizedBox(
-                      height: 120,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context); // 현재 창 닫기
-                          _showSaveDialog(context, "card"); //
-                        },
-                        child: const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.credit_card, size: 40, color: Colors.white),
-                            Text("카드", style: TextStyle(fontSize: 25, color: Colors.white, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _showSaveDialog(BuildContext context, String paymentMethod) {
-    final vm = context.read<ProductViewModel>();
-    final int finalTotal = vm.getTotalCartPrice();
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (context) {
         return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+          elevation: 10,
           child: Container(
-            width: 420,
-            padding: EdgeInsets.all(24),
+            width: 450,
+            padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Align(
                   alignment: Alignment.topRight,
                   child: IconButton(
-                    icon: Icon(Icons.close, size: 40),
+                    icon: const Icon(Icons.close, size: 30),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
-                Text(
-                  "계산하기",
-                  style: TextStyle(
-                    fontSize: 35,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
+                const Text(
+                  "결제 방법",
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: -1),
                 ),
-                SizedBox(height: 20),
-                RichText(
-                  text: TextSpan(
-                    style: const TextStyle(
-                      fontSize: 25,
-                      color: Colors.black87,
-
+                const SizedBox(height: 10),
+                const Text("진행하실 결제 수단을 선택해 주세요.",
+                    style: TextStyle(fontSize: 18, color: Colors.grey)),
+                const SizedBox(height: 35),
+                Row(
+                  children: [
+                    _buildPaymentOption(
+                      context,
+                      title: "현금 결제",
+                      subtitle: "CASH",
+                      icon: Icons.monetization_on_rounded,
+                      color: Colors.orange,
+                      onTap: () {
+                        Navigator.pop(context);
+                        _showSaveDialog(context, false);
+                      },
                     ),
-                    children: [
-                      TextSpan(
-                          text: "총 금액 "
-                      ),
-                      TextSpan(
-                          text: "$finalTotal",
-                          style: TextStyle(
-                              fontSize: 35,
-                              color: AppColors.mainColor,
-                              fontWeight: FontWeight.bold
-                          )
-                      ),
-                      TextSpan(
-                          text: " 원"
-                      )
-                    ],
-                  ),
+                    const SizedBox(width: 20),
+                    _buildPaymentOption(
+                      context,
+                      title: "카드 결제",
+                      subtitle: "CARD",
+                      icon: Icons.credit_card_rounded,
+                      color: Colors.blue,
+                      onTap: () {
+                        Navigator.pop(context);
+                        _showSaveDialog(context, true);
+                      },
+                    ),
+                  ],
                 ),
-                SizedBox(height: 30),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      backgroundColor: AppColors.mainColor,
-                      foregroundColor: Colors.white,
-                    ),
-                    onPressed: () async {
-                      try {
-                        await vm.saveSelection();
-                        vm.clearQuantities();
-                        if (context.mounted) {
-                          context.read<SalesHistoryViewModel>().loadHistory();
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("판매 내역이 저장되었습니다."),
-                            ),
-                          );
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("저장 실패: $e"), backgroundColor: Colors.red),
-                          );
-                        }
-                      }
-                    },
-                    child: Text(
-                      "판매 내역 저장하기",
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(
-                            offset: Offset(0, 1),
-                            blurRadius: 4,
-                            color: Color(0x55000000),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 10),
+                const SizedBox(height: 20),
               ],
             ),
           ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPaymentOption(BuildContext context,
+      {required String title, required String subtitle, required IconData icon, required Color color, required VoidCallback onTap}) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 160,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: color.withOpacity(0.2), width: 2),
+            boxShadow: [
+              BoxShadow(color: color.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 50, color: color),
+              const SizedBox(height: 12),
+              Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(subtitle, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: color.withOpacity(0.6))),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSaveDialog(BuildContext context, bool isCardPayment) {
+    final vm = context.read<ProductViewModel>();
+    final int finalTotal = vm.getTotalCartPrice();
+    final selectedProducts = vm.products.where((p) => vm.getQuantity(p.productNumber) > 0).toList();
+
+    final TextEditingController cashController = TextEditingController();
+    final FocusNode cashFocusNode = FocusNode();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            cashFocusNode.addListener(() {
+              if (context.mounted) setDialogState(() {});
+            });
+            int receivedAmount = int.tryParse(cashController.text) ?? 0;
+            int change = receivedAmount - finalTotal;
+
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25)),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.85,
+                  maxWidth: 500,
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border(
+                        left: BorderSide(
+                            color: isCardPayment ? Colors.blue : Colors.orange,
+                            width: 10)),
+                    color: Colors.white,
+                  ),
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("결제 영수증 확인",
+                              style: TextStyle(
+                                  fontSize: 30, fontWeight: FontWeight.w900)),
+                          IconButton(
+                            icon: const Icon(Icons.close, size: 35),
+                            onPressed: () {
+                              cashFocusNode.dispose();
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ],
+                      ),
+                      const Divider(),
+                      Flexible(
+                        child: SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 10),
+                              Text(
+                                "결제 수단: ${isCardPayment ? '카드 결제 (CARD)' : '현금 결제 (CASH)'}",
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    color: isCardPayment
+                                        ? Colors.blue
+                                        : Colors.orange,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 20),
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[50],
+                                  borderRadius: BorderRadius.circular(15),
+                                  border: Border.all(color: Colors.grey[200]!),
+                                ),
+                                child: Column(
+                                  children: [
+                                    const Row(
+                                      children: [
+                                        Expanded(flex: 3, child: Text("품명", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))),
+                                        Expanded(flex: 1, child: Text("수량", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))),
+                                        Expanded(flex: 2, child: Text("금액", textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))),
+                                      ],
+                                    ),
+                                    const Divider(height: 20),
+                                    ...selectedProducts.map((p) {
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 6),
+                                        child: Row(
+                                          children: [
+                                            Expanded(flex: 3, child: Text(p.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500))),
+                                            Expanded(flex: 1, child: Text("${vm.getQuantity(p.productNumber)}개", textAlign: TextAlign.center, style: const TextStyle(fontSize: 18, color: Colors.grey))),
+                                            Expanded(flex: 2, child: Text("${vm.getTotalPriceWithDiscount(p.productNumber)}원", textAlign: TextAlign.right, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                    const Divider(height: 30),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text("최종 합계", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24)),
+                                        Text("$finalTotal원", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 30, color: AppColors.mainColor)),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+                              if (!isCardPayment) ...[
+                                const SizedBox(height: 25),
+                                TextField(
+                                  controller: cashController,
+                                  focusNode: cashFocusNode,
+                                  keyboardType: TextInputType.number,
+                                  autofocus: true,
+                                  textAlign: TextAlign.end,
+                                  style: TextStyle(
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.bold,
+                                  ),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                    LengthLimitingTextInputFormatter(6),
+                                  ],
+                                  decoration: InputDecoration(
+                                    labelText: "받은 금액",
+                                    labelStyle: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        color: cashFocusNode.hasFocus
+                                            ? AppColors.mainColor
+                                            : AppColors.mainDarkColor),
+                                    suffixText: " 원",
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: AppColors.mainColor,
+                                            width: 3),
+                                        borderRadius:
+                                        BorderRadius.circular(15)),
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: AppColors.mainDarkColor,
+                                            width: 2),
+                                        borderRadius:
+                                        BorderRadius.circular(15)),
+                                  ),
+                                  onChanged: (value) {
+                                    cashController.selection =
+                                        TextSelection.fromPosition(TextPosition(
+                                            offset: cashController.text.length));
+                                    setDialogState(() {});
+                                  },
+                                ),
+                                const SizedBox(height: 15),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text("거스름돈", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey)),
+                                    Text(
+                                      "${change < 0 ? 0 : change} 원",
+                                      style: TextStyle(
+                                          fontSize: 35,
+                                          fontWeight: FontWeight.w900,
+                                          color: change >= 0
+                                              ? AppColors.mainColor
+                                              : Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                              const SizedBox(height: 20),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 65,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.mainColor,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15)),
+                            elevation: 5,
+                          ),
+                          onPressed: (!isCardPayment && change < 0)
+                              ? null
+                              : () async {
+                            await vm.saveSelection(isCardPayment);
+                            vm.clearQuantities();
+                            if (context.mounted) {
+                              context.read<SalesHistoryViewModel>().loadHistory();
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("결제가 정상적으로 완료되었습니다.")));
+                            }
+                          },
+                          child: Text(
+                              (!isCardPayment && change < 0)
+                                  ? "금액 부족"
+                                  : "결제 완료 및 저장",
+                              style: const TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         );
       },
     );
