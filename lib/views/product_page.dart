@@ -17,14 +17,14 @@ class ProductPage extends StatelessWidget {
       }
       return Color(int.parse('0x$hexCode'));
     } catch (e) {
-      return Colors.grey; // 변환 실패 시 기본색
+      return Colors.grey;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<ProductViewModel>();
-    final products = vm.products; //
+    final products = vm.products;
 
     return Padding(
       padding: EdgeInsets.only(top: 20, left: 5, right: 5, bottom: 10),
@@ -169,7 +169,7 @@ class ProductPage extends StatelessWidget {
                                 style: const TextStyle(
                                   fontSize: 25,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black, // 기본 색(나머지)
+                                  color: Colors.black,
                                 ),
                                 children: [
                                   const TextSpan(
@@ -265,7 +265,7 @@ class ProductPage extends StatelessWidget {
                   children: [
                     _buildPaymentOption(
                       context,
-                      title: "현금 결제",
+                      title: "현금 또는 계좌 이체",
                       subtitle: "CASH",
                       icon: Icons.monetization_on_rounded,
                       color: Colors.orange,
@@ -334,12 +334,14 @@ class ProductPage extends StatelessWidget {
     final TextEditingController cashController = TextEditingController();
     final FocusNode cashFocusNode = FocusNode();
 
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            bool isAccountTransfer = cashController.text == finalTotal.toString();
             cashFocusNode.addListener(() {
               if (context.mounted) setDialogState(() {});
             });
@@ -441,48 +443,146 @@ class ProductPage extends StatelessWidget {
                               ),
                               if (!isCardPayment) ...[
                                 const SizedBox(height: 25),
-                                TextField(
-                                  controller: cashController,
-                                  focusNode: cashFocusNode,
-                                  keyboardType: TextInputType.number,
-                                  autofocus: true,
-                                  textAlign: TextAlign.end,
-                                  style: TextStyle(
+                                AbsorbPointer(
+                                  absorbing: isAccountTransfer, // 계좌이체 상태면 터치 차단
+                                  child: TextField(
+                                    controller: cashController,
+                                    readOnly: true,
+                                    onTap: () {
+                                      // 이제 absorbing이 false일 때만 실행됩니다.
+                                      _showCashInputPad(context, (totalAmount) {
+                                        setDialogState(() {
+                                          cashController.text = totalAmount.toString();
+                                        });
+                                      });
+                                    },
+                                    focusNode: cashFocusNode,
+                                    textAlign: TextAlign.left,
+                                    style: TextStyle(
                                       fontSize: 30,
                                       fontWeight: FontWeight.bold,
-                                  ),
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly,
-                                    LengthLimitingTextInputFormatter(6),
-                                  ],
-                                  decoration: InputDecoration(
-                                    labelText: "받은 금액",
-                                    labelStyle: TextStyle(
-                                        fontWeight: FontWeight.bold,
+                                      // 비활성화 시 글자색을 흐리게 변경
+                                      color: (isAccountTransfer)
+                                          ? Colors.grey
+                                          : Colors.black,
+                                    ),
+                                    decoration: InputDecoration(
+                                      labelText: "받은 금액",
+                                      filled: true,
+                                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                                      hintText: "클릭하여 현금을 입력하세요.",
+                                      hintStyle: TextStyle(
+                                        color: Colors.grey[400], // 연한 회색
                                         fontSize: 20,
-                                        color: cashFocusNode.hasFocus
-                                            ? AppColors.mainColor
-                                            : AppColors.mainDarkColor),
-                                    suffixText: " 원",
-                                    focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: AppColors.mainColor,
-                                            width: 3),
-                                        borderRadius:
-                                        BorderRadius.circular(15)),
-                                    enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: AppColors.mainDarkColor,
-                                            width: 2),
-                                        borderRadius:
-                                        BorderRadius.circular(15)),
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                      // 비활성화 시 배경색을 더 진한 회색으로 변경
+                                      fillColor: (isAccountTransfer)
+                                          ? Colors.grey[300]
+                                          : Colors.white,
+                                      labelStyle: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20,
+                                          color: (isAccountTransfer)
+                                              ? Colors.grey
+                                              : (cashFocusNode.hasFocus
+                                              ? AppColors.mainColor
+                                              : AppColors.mainDarkColor)),
+                                      suffixText: cashController.text.isEmpty ? "" : " 원",
+                                      suffixStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                      focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: AppColors.mainColor,
+                                              width: 3),
+                                          borderRadius: BorderRadius.circular(15)),
+                                      enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: (isAccountTransfer)
+                                                  ? Colors.grey[400]!
+                                                  : AppColors.mainColor,
+                                              width: 2),
+                                          borderRadius: BorderRadius.circular(15)),
+                                    ),
                                   ),
-                                  onChanged: (value) {
-                                    cashController.selection =
-                                        TextSelection.fromPosition(TextPosition(
-                                            offset: cashController.text.length));
-                                    setDialogState(() {});
+                                ),
+                                const SizedBox(height: 15),
+                                InkWell(
+                                  onTap: () {
+                                    setDialogState(() {
+                                      if (isAccountTransfer) {
+                                        cashController.clear(); // 이미 선택된 상태면 해제
+                                      } else {
+                                        cashController.text = finalTotal.toString(); // 아니면 금액 자동 입력
+                                      }
+                                    });
                                   },
+                                  borderRadius: BorderRadius.circular(15),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                                    decoration: BoxDecoration(
+                                      // 선택 시 메인 컬러 배경, 비선택 시 연한 회색 배경
+                                      color: (isAccountTransfer)
+                                          ? AppColors.mainColor
+                                          : Colors.grey[100],
+                                      borderRadius: BorderRadius.circular(15),
+                                      border: Border.all(
+                                        color: (isAccountTransfer)
+                                            ? AppColors.mainColor
+                                            : Colors.grey[400]!,
+                                        width: 2.5,
+                                      ),
+                                      boxShadow: (isAccountTransfer)
+                                          ? [BoxShadow(color: AppColors.mainColor.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 4))]
+                                          : [],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        // 아이콘 변경 (선택 상태에 따라)
+                                        Icon(
+                                          (isAccountTransfer)
+                                              ? Icons.check_circle_rounded
+                                              : Icons.account_balance_wallet_outlined,
+                                          color: (isAccountTransfer) ? Colors.white : AppColors.mainColor,
+                                          size: 30,
+                                        ),
+                                        const SizedBox(width: 15),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "계좌 이체로 결제하기",
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: (isAccountTransfer) ? Colors.white : Colors.black87,
+                                                ),
+                                              ),
+                                              Text(
+                                                "상품 금액이 자동으로 입력됩니다",
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: (isAccountTransfer)
+                                                      ? Colors.white.withOpacity(0.8)
+                                                      : Colors.grey[600],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        // 우측 금액 표시
+                                        Text(
+                                          "$finalTotal원",
+                                          style: TextStyle(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.w900,
+                                            color: (isAccountTransfer) ? Colors.white : AppColors.mainColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                                 const SizedBox(height: 15),
                                 Row(
@@ -538,6 +638,194 @@ class ProductPage extends StatelessWidget {
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white)),
                         ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showCashInputPad(BuildContext context, Function(int) onConfirm) {
+    int currentTotal = 0;
+
+    final List<Map<String, dynamic>> cashUnits = [
+      {'value': 50000, 'img': 'ic_bill_50000_won.png', 'count': 0},
+      {'value': 10000, 'img': 'ic_bill_10000_won.png', 'count': 0},
+      {'value': 5000, 'img': 'ic_bill_5000_won.png', 'count': 0},
+      {'value': 1000, 'img': 'ic_bill_1000_won.png', 'count': 0},
+      {'value': 500, 'img': 'ic_coin_500_won.png', 'count': 0},
+      {'value': 100, 'img': 'ic_coin_100_won.png', 'count': 0},
+      {'value': 50, 'img': 'ic_coin_50_won.png', 'count': 0},
+      {'value': 10, 'img': 'ic_coin_10_won.png', 'count': 0},
+    ];
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setPadState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.9,
+                  maxWidth: 650,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // 상단 헤더 및 초기화 버튼
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("현금 입력 패드", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                          IconButton(
+                            icon: const Icon(Icons.refresh_rounded, color: Colors.orange, size: 35),
+                            onPressed: () => setPadState(() {
+                              currentTotal = 0;
+                              for (var unit in cashUnits) { unit['count'] = 0; }
+                            }),
+                          ),
+                        ],
+                      ),
+                      const Divider(height: 20),
+
+                      // 현재 입력된 총액 표시창
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(color: Colors.grey[300]!),
+                        ),
+                        child: Text(
+                          "${currentTotal.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} 원",
+                          textAlign: TextAlign.right,
+                          style: TextStyle(fontSize: 35, fontWeight: FontWeight.w900, color: AppColors.mainColor),
+                        ),
+                      ),
+
+                      const SizedBox(height: 15),
+
+                      // 지폐/동전 그리드 영역
+                      Flexible(
+                        child: SingleChildScrollView(
+                          child: GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 4,
+                              mainAxisSpacing: 12,
+                              crossAxisSpacing: 12,
+                              childAspectRatio: 0.8,
+                            ),
+                            itemCount: cashUnits.length,
+                            itemBuilder: (context, index) {
+                              int count = cashUnits[index]['count'];
+                              return Material(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(15),
+                                elevation: 2,
+                                child: InkWell(
+                                  onTap: () {
+                                    setPadState(() {
+                                      currentTotal += cashUnits[index]['value'] as int;
+                                      cashUnits[index]['count'] += 1;
+                                    });
+                                  },
+                                  borderRadius: BorderRadius.circular(15),
+                                  splashColor: AppColors.mainColor.withOpacity(0.3),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      border: Border.all(
+                                        color: count > 0 ? AppColors.mainColor : Colors.grey[300]!,
+                                        width: count > 0 ? 2 : 1,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Expanded(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Image.asset(
+                                              "assets/image/${cashUnits[index]['img']}",
+                                              fit: BoxFit.contain,
+                                              errorBuilder: (context, error, stackTrace) =>
+                                              const Icon(Icons.monetization_on, size: 40, color: Colors.grey),
+                                            ),
+                                          ),
+                                        ),
+                                        Container(
+                                          width: double.infinity,
+                                          height: 30,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: count > 0 ? AppColors.mainColor : Colors.grey[100],
+                                            borderRadius: const BorderRadius.only(
+                                              bottomLeft: Radius.circular(12),
+                                              bottomRight: Radius.circular(12),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            "$count 개",
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: count > 0 ? Colors.white : Colors.grey[700],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // 하단 확인 및 취소 버튼
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 15),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                              ),
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("취소", style: TextStyle(fontSize: 20, color: Colors.grey)),
+                            ),
+                          ),
+                          const SizedBox(width: 15),
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.mainColor,
+                                padding: const EdgeInsets.symmetric(vertical: 15),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                              ),
+                              onPressed: () {
+                                onConfirm(currentTotal);
+                                Navigator.pop(context);
+                              },
+                              child: const Text("금액 적용",
+                                  style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
