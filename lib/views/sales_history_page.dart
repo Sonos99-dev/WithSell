@@ -251,7 +251,7 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
                                   child: Text(
                                     isCanceled
                                         ? "결제 취소된 내역입니다"
-                                        : "결제시각: ${DateFormat('HH:mm:ss').format(time)}",
+                                        : "결제시각: ${DateFormat('a h시 m분').format(time)}",
                                     style: TextStyle(
                                       fontSize: 16,
                                       color: Colors.grey[600],
