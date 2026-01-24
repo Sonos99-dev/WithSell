@@ -128,7 +128,21 @@ class ProductPage extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 if (discountAmount > 0)
-                                  Text("-$discountAmount원", style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 13)),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFEFF0),
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Text(
+                                      "할인 -$discountAmount원",
+                                      style: const TextStyle(
+                                        color: Color(0xFFE5484D),
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
                                 Text(
                                   "$totalPrice원",
                                   style: const TextStyle(fontSize: 37, fontWeight: FontWeight.w900, color: Colors.black),
@@ -154,7 +168,7 @@ class ProductPage extends StatelessWidget {
           child: FloatingActionButton.extended(
             backgroundColor: Colors.orange[700],
             elevation: 4,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
             onPressed: () => _showPaymentMethodDialog(context),
             label: Text("${vm.getTotalCartPrice()}원 결제하기", style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white)),
             icon: const Icon(Icons.payment, color: Colors.white, size: 28),
