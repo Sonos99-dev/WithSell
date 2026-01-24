@@ -57,7 +57,8 @@ class AdminViewModel extends ChangeNotifier {
     required int price,
     required String borderColor,
     required int discountPrice,
-    required int discountQuantity
+    required int discountQuantity,
+    required String imgUrl
   }) async {
     _setLoading(true);
     try {
@@ -71,7 +72,8 @@ class AdminViewModel extends ChangeNotifier {
         price: price,
         borderColor: borderColor,
         discountPrice: discountPrice,
-        discountQuantity: discountQuantity
+        discountQuantity: discountQuantity,
+        imgUrl: imgUrl,
       );
 
       await _repo.postProduct(newProduct);
@@ -100,6 +102,7 @@ class AdminViewModel extends ChangeNotifier {
     required String borderColor,
     required int discountPrice,
     required int discountQuantity,
+    required String imgUrl,
   }) async {
     _setLoading(true);
     try {
@@ -110,6 +113,7 @@ class AdminViewModel extends ChangeNotifier {
         borderColor: borderColor,
         discountPrice: discountPrice,
         discountQuantity: discountQuantity,
+        imgUrl: imgUrl,
       );
 
       await _repo.postProduct(updatedProduct);

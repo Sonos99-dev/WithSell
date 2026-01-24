@@ -25,6 +25,7 @@ class _AddProductPageState extends State<AddProductPage> {
   late TextEditingController _colorController;
   late TextEditingController _discountPriceController;
   late TextEditingController _discountQuantityController;
+  late TextEditingController _imgUrlController;
 
   Color _selectedColor = Colors.red;
   bool _isDiscountEnabled = false;
@@ -37,10 +38,9 @@ class _AddProductPageState extends State<AddProductPage> {
     _nameController = TextEditingController(text: widget.product?.name ?? "");
     _priceController = TextEditingController(text: widget.product?.price.toString() ?? "");
     _colorController = TextEditingController(text: widget.product?.borderColor ?? "#000000");
-    _discountPriceController = TextEditingController(
-        text: isEditing ? widget.product?.discountPrice.toString() : "");
-    _discountQuantityController = TextEditingController(
-        text: isEditing ? widget.product?.discountQuantity.toString() : "");
+    _discountPriceController = TextEditingController(text: isEditing ? widget.product?.discountPrice.toString() : "");
+    _discountQuantityController = TextEditingController(text: isEditing ? widget.product?.discountQuantity.toString() : "");
+    _imgUrlController = TextEditingController(text: widget.product?.imgUrl ?? "");
 
     // 2. 초기 색상 및 할인 체크박스 상태 설정
     if (isEditing) {
@@ -105,6 +105,7 @@ class _AddProductPageState extends State<AddProductPage> {
             children: [
               _buildTextField(_nameController, "상품명", Icons.shopping_bag),
               _buildTextField(_priceController, "기본 가격", Icons.attach_money, isNumber: true),
+              _buildTextField(_imgUrlController, "이미지 URL (Firebase Storage 등)", Icons.image),
 
               GestureDetector(
                 onTap: _pickColor,
@@ -217,6 +218,7 @@ class _AddProductPageState extends State<AddProductPage> {
           borderColor: _colorController.text,
           discountPrice: dPrice,
           discountQuantity: dQty,
+          imgUrl: _imgUrlController.text,
         );
       } else {
         // [등록 모드]: addProduct 호출
@@ -226,6 +228,7 @@ class _AddProductPageState extends State<AddProductPage> {
           borderColor: _colorController.text,
           discountPrice: dPrice,
           discountQuantity: dQty,
+          imgUrl: _imgUrlController.text,
         );
       }
 

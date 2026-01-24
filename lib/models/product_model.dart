@@ -5,6 +5,7 @@ class ProductModel {
   final int price;
   final int productNumber;
   final String borderColor;
+  final String imgUrl;
 
   const ProductModel({
     required this.discountPrice,
@@ -13,6 +14,7 @@ class ProductModel {
     required this.price,
     required this.productNumber,
     required this.borderColor,
+    required this.imgUrl,
   });
 
   //
@@ -24,6 +26,7 @@ class ProductModel {
       price: data['price'] ?? 0,
       productNumber: data['productNumber'] ?? 0,
       borderColor: data['borderColor'] ?? '',
+      imgUrl: data['imgUrl'] ?? '',
     );
   }
 
@@ -36,6 +39,7 @@ class ProductModel {
       price: json['price'] ?? 0,
       productNumber: json['productNumber'] ?? 0,
       borderColor: json['borderColor'] ?? '',
+      imgUrl: json['imgUrl'] ?? '',
     );
   }
 
@@ -48,6 +52,7 @@ class ProductModel {
       "price": price,
       "productNumber": productNumber,
       "borderColor": borderColor,
+      "imgUrl": imgUrl,
     };
   }
 
@@ -61,6 +66,7 @@ class ProductModel {
     int? price,
     int? productNumber,
     String? borderColor,
+    String? imgUrl
   }) {
     return ProductModel(
       discountPrice: discountPrice ?? this.discountPrice,
@@ -69,6 +75,7 @@ class ProductModel {
       price: price ?? this.price,
       productNumber: productNumber ?? this.productNumber,
       borderColor: borderColor ?? this.borderColor,
+      imgUrl: imgUrl ?? this.imgUrl
     );
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:project/viewmodels/admin_view_model.dart';
-import 'package:project/viewmodels/product_view_model.dart';
 import 'package:project/views/admin_page.dart';
 import 'package:project/views/app_color.dart';
 import 'package:project/views/sales_history_page.dart';

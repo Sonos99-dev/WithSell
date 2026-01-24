@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,211 +27,164 @@ class ProductPage extends StatelessWidget {
     final vm = context.watch<ProductViewModel>();
     final products = vm.products;
 
-    return Padding(
-      padding: EdgeInsets.only(top: 20, left: 5, right: 5, bottom: 10),
-      child: Scaffold(
-        body: products.isEmpty
-            ? Center(child: Text("상품이 없습니다.\n관리자 페이지를 통해 상품을 등록하고 불러와 보세요", style: TextStyle(fontSize: 30, color: Colors.black87), textAlign: TextAlign.center,))
-            : GridView.builder(
-          padding: EdgeInsets.only(
-            top: 30,
-            left: 12,
-            right: 12,
-            bottom: 70,
-          ),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount:
-            MediaQuery.of(context).orientation == Orientation.landscape
-                ? 2
-                : 1,
-            childAspectRatio: 1.6,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-          ),
-          itemCount: products.length,
-          itemBuilder: (_, index) {
-            final p = products[index];
-            final quantity = vm.getQuantity(p.productNumber);
-            final totalPrice = vm.getTotalPriceWithDiscount(p.productNumber);
-            final discountAmount = vm.getDiscountAmount(p.productNumber);
-            final Color borderColor = _hexToColor(p.borderColor).withOpacity(0.8);
-            final Color textColor = _hexToColor(p.borderColor);
+    return Scaffold(
+      backgroundColor: const Color(0xFFF2F2F7),
+      body: products.isEmpty
+          ? const Center(child: Text("등록된 상품이 없습니다.", style: TextStyle(fontSize: 20)))
+          : GridView.builder(
+        padding: const EdgeInsets.fromLTRB(12, 20, 12, 110),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: MediaQuery.of(context).orientation == Orientation.landscape ? 2 : 1,
+          childAspectRatio: 2.1,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+        ),
+        itemCount: products.length,
+        itemBuilder: (_, index) {
+          final p = products[index];
+          final quantity = vm.getQuantity(p.productNumber);
+          final totalPrice = vm.getTotalPriceWithDiscount(p.productNumber);
+          final discountAmount = vm.getDiscountAmount(p.productNumber);
+          final Color themeColor = _hexToColor(p.borderColor);
 
-            return Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(
-                  color: borderColor,
-                  width: 7
-                )
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Product info View
-                    Expanded(
-                      flex: 1,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 3))
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 5,
+                  child: Container(
+                    height: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), bottomLeft: Radius.circular(16)),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), bottomLeft: Radius.circular(16)),
+                      child: p.imgUrl.isNotEmpty
+                          ? CachedNetworkImage(
+                        imageUrl: p.imgUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => const Center(child: CupertinoActivityIndicator()),
+                        errorWidget: (_, __, ___) => const Icon(Icons.image_not_supported, color: Colors.grey),
+                      )
+                          : const Icon(Icons.image, color: Colors.grey, size: 50),
+                    ),
+                  ),
+                ),
+
+                Expanded(
+                  flex: 6,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          p.name,
+                          style: const TextStyle(fontSize: 27, fontWeight: FontWeight.w900, color: Colors.black, height: 1.1),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "${p.price}원",
+                          style: TextStyle(fontSize: 25, color: Colors.grey[700], fontWeight: FontWeight.w600),
+                        ),
+
+                        const Spacer(),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(
-                              p.name,
-                              style: TextStyle(
-                                  color: textColor,
-                                  fontSize: 40,
-                                  fontWeight: FontWeight.bold,
-                                shadows: [
-                                  Shadow(
-                                    offset: Offset(0, 1),
-                                    blurRadius: 2,
-                                    color: Color(0x33000000),
+                            Container(
+                              height: 55,
+                              decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: Row(
+                                children: [
+                                  _buildCircularQtyBtn(Icons.remove, Colors.blue, () {
+                                    if (quantity > 0) vm.setQuantity(p.productNumber, quantity - 1);
+                                  }),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                                    child: Text("$quantity", style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
                                   ),
+                                  _buildCircularQtyBtn(Icons.add, Colors.red, () => vm.setQuantity(p.productNumber, quantity + 1)),
                                 ],
                               ),
-                              maxLines: 3,
                             ),
-                            SizedBox(height: 8),
-                            Text(
-                              "가격: ${p.price}원",
-                              style: TextStyle(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.bold,
-                                  color: borderColor),
-                            ),
-                            SizedBox(height: 8),
-                            Row(
+
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                IconButton(
-                                  icon: Icon(Icons.remove),
-                                  iconSize: 80,
-                                  color: Colors.blueAccent,
-                                  onPressed: () {
-                                    if (quantity > 0) {
-                                      vm.setQuantity(
-                                          p.productNumber, quantity - 1);
-                                    }
-                                  },
-                                ),
+                                if (discountAmount > 0)
+                                  Text("-$discountAmount원", style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 13)),
                                 Text(
-                                  "$quantity",
-                                  style: TextStyle(
-                                      fontSize: 40,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                IconButton(
-                                  iconSize: 80,
-                                  icon: Icon(Icons.add),
-                                  color: Colors.redAccent,
-                                  onPressed: () {
-                                    vm.setQuantity(
-                                        p.productNumber, quantity + 1);
-                                  },
+                                  "$totalPrice원",
+                                  style: const TextStyle(fontSize: 37, fontWeight: FontWeight.w900, color: Colors.black),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 10),
-                            RichText(
-                              text: TextSpan(
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: "할인 된 금액: ",
-                                    style: TextStyle(
-                                      color: Colors.grey
-                                    )
-                                  ),
-                                  TextSpan(
-                                      text: " $discountAmount",
-                                      style: TextStyle(
-                                          fontSize: 25,
-                                          color: Colors.black54
-                                      )
-                                  ),
-                                  TextSpan(
-                                      text: " 원"
-                                  )
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            RichText(
-                              text: TextSpan(
-                                style: const TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                                children: [
-                                  const TextSpan(
-                                    text: "총 금액: ",
-                                  ),
-                                  TextSpan(
-                                    text: "$totalPrice",
-                                    style: TextStyle(
-                                      fontSize: 35,
-                                      color: textColor
-                                    )
-                                  ),
-                                  TextSpan(
-                                    text: " 원"
-                                  )
-                                ],
-                              ),
-                            )
                           ],
                         ),
-                      ),
+                      ],
                     ),
-
-                    // img
-                    Expanded(
-                      flex: 1,
-                      child: Container(color: Colors.black,),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
-      
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-        floatingActionButton: Visibility(
-          visible: products.isNotEmpty && vm.getTotalCartPrice() != 0,
-          child: SizedBox(
-            width: 300,
-            height: 100,
-            child: FloatingActionButton.extended(
-              backgroundColor: AppColors.mainColor,
-              foregroundColor: Colors.white,
-              onPressed: () {
-                _showPaymentMethodDialog(context);
-              },
-              label: Text(
-                "계산하기",
-                style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
-              ),
-              icon: Icon(
-                Icons.calculate_rounded,
-                size: 50,
-              ),
+              ],
             ),
+          );
+        },
+      ),
+      floatingActionButton: Visibility(
+        visible: products.isNotEmpty && vm.getTotalCartPrice() != 0,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.95,
+          height: 80,
+          child: FloatingActionButton.extended(
+            backgroundColor: Colors.orange[700],
+            elevation: 4,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            onPressed: () => _showPaymentMethodDialog(context),
+            label: Text("${vm.getTotalCartPrice()}원 결제하기", style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white)),
+            icon: const Icon(Icons.payment, color: Colors.white, size: 28),
           ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Widget _buildCircularQtyBtn(IconData icon, Color color, VoidCallback onPressed) {
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 55,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(
+          icon,
+          color: color,
+          size: 32,
         ),
       ),
     );
   }
+
 
   void _showPaymentMethodDialog(BuildContext context) {
     showDialog(
@@ -495,6 +449,25 @@ class ProductPage extends StatelessWidget {
                                     ),
                                   ),
                                 ),
+                                const SizedBox(height: 10),
+                                Visibility(
+                                  visible: !isAccountTransfer,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text("거스름 돈", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey)),
+                                      Text(
+                                        "${change < 0 ? 0 : change} 원",
+                                        style: TextStyle(
+                                            fontSize: 35,
+                                            fontWeight: FontWeight.w900,
+                                            color: change >= 0
+                                                ? AppColors.mainColor
+                                                : Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                                 const SizedBox(height: 15),
                                 InkWell(
                                   onTap: () {
@@ -563,22 +536,7 @@ class ProductPage extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 15),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text("거스름돈", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey)),
-                                    Text(
-                                      "${change < 0 ? 0 : change} 원",
-                                      style: TextStyle(
-                                          fontSize: 35,
-                                          fontWeight: FontWeight.w900,
-                                          color: change >= 0
-                                              ? AppColors.mainColor
-                                              : Colors.grey),
-                                    ),
-                                  ],
-                                ),
+
                               ],
                               const SizedBox(height: 20),
                             ],
