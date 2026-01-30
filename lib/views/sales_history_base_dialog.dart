@@ -43,7 +43,7 @@ class SalesHistoryBaseDialog extends StatelessWidget {
               child: Icon(icon, color: iconColor, size: 50),
             ),
             const SizedBox(height: 24),
-            Text(title, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: iconColor)),
+            Text(title, style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: iconColor)),
             const SizedBox(height: 12),
             Text(content, textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: subTextColor, height: 1.5)),
             if (customContent != null) ...[
@@ -66,7 +66,7 @@ class SalesHistoryBaseDialog extends StatelessWidget {
                         style: TextStyle(
                         fontSize: 18,
                         color: isDangerDialog ? iconColor : Colors.white,
-                        fontWeight: FontWeight.bold
+                        fontWeight: FontWeight.w900
                         )
                     ),
                   ),

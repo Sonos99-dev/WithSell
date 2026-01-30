@@ -36,7 +36,7 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
           "판매 내역",
           style: TextStyle(
             color: Colors.white,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w900,
             fontSize: 24,
           ),
         ),
@@ -94,7 +94,7 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
                         style: const TextStyle(
                           color: Colors.black,
                           fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w900,
                         ),
                         items: sortedDates
                             .map(
@@ -176,7 +176,7 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
                                       color: isCanceled
                                           ? Colors.grey
                                           : AppColors.mainDarkColor,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w900,
                                       fontSize: 18,
                                     ),
                                   ),
@@ -187,7 +187,7 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
                                       "금액 ${record['totalAmount']}원",
                                       style: TextStyle(
                                         fontSize: 22,
-                                        fontWeight: FontWeight.bold,
+                                        fontWeight: FontWeight.w900,
                                         letterSpacing: -0.5,
                                         decoration: isCanceled
                                             ? TextDecoration.lineThrough
@@ -309,7 +309,7 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
                                                   "${item['totalPrice']}원",
                                                   style: const TextStyle(
                                                     fontSize: 18,
-                                                    fontWeight: FontWeight.bold,
+                                                    fontWeight: FontWeight.w900,
                                                   ),
                                                 ),
                                               ],

@@ -37,7 +37,7 @@ class _AdminAuthViewState extends State<AdminAuthView> {
           children: [
             Icon(Icons.admin_panel_settings, size: 80, color: AppColors.mainColor),
             const SizedBox(height: 20),
-            const Text("관리자 인증", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const Text("관리자 인증", style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
             const SizedBox(height: 10),
             const Text("앱 설치 후 최초의 비밀번호는 '0000' 입니다.\n 비밀번호를 잊으신 경우 앱을 재설치 해주세요.", style: TextStyle(fontSize: 16, color: Colors.black54), textAlign: TextAlign.center,),
             const SizedBox(height: 30),
@@ -64,12 +64,6 @@ class _AdminAuthViewState extends State<AdminAuthView> {
                   }
                 },
               ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _handleAuth,
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.mainColor, minimumSize: const Size(250, 50)),
-              child: const Text("접속", style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

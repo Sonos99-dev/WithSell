@@ -73,7 +73,7 @@ class _MainScreenState extends State<MainScreen> {
             onTap: _onItemTapped,
             selectedItemColor: Colors.white,
             selectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w900,
               fontSize: 14,
               shadows: [
                 Shadow(
@@ -87,7 +87,7 @@ class _MainScreenState extends State<MainScreen> {
 
             unselectedItemColor: Colors.white54,
             unselectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w900,
               fontSize: 12,
               shadows: [
                 Shadow(

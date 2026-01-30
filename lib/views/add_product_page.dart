@@ -48,7 +48,7 @@ class _AddProductPageState extends State<AddProductPage> {
       backgroundColor: const Color(0xFFF8F9FA), // 밝은 회색 배경
       appBar: AppBar(
         title: Text(isEditing ? "상품 정보 수정" : "새 상품 등록",
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
         backgroundColor: AppColors.mainColor,
         elevation: 0,
         centerTitle: true,
@@ -89,7 +89,7 @@ class _AddProductPageState extends State<AddProductPage> {
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 12),
-      child: Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87)),
+      child: Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.black87)),
     );
   }
 
@@ -133,7 +133,7 @@ class _AddProductPageState extends State<AddProductPage> {
         children: [
           SwitchListTile(
             title: Text("다량 구매 할인 적용",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: _isDiscountEnabled ? AppColors.mainColor : Colors.black)),
+                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24, color: _isDiscountEnabled ? AppColors.mainColor : Colors.black)),
             subtitle: Text(_isDiscountEnabled ? "할인 혜택이 활성화되었습니다." : "할인 혜택을 설정하려면 켜주세요.", style: TextStyle(fontSize: 16),),
             value: _isDiscountEnabled,
             activeColor: AppColors.mainColor,
@@ -180,7 +180,7 @@ class _AddProductPageState extends State<AddProductPage> {
         textAlign: TextAlign.center,
         style: const TextStyle(
             fontSize: 20,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w900,
             color: AppColors.mainColor
         ),
         decoration: InputDecoration(
@@ -229,7 +229,7 @@ class _AddProductPageState extends State<AddProductPage> {
       filled: true,
       fillColor: const Color(0xFFF1F3F5),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
-      floatingLabelStyle: const TextStyle(color: AppColors.mainColor, fontWeight: FontWeight.bold, fontSize: 22),
+      floatingLabelStyle: const TextStyle(color: AppColors.mainColor, fontWeight: FontWeight.w900, fontSize: 22),
     );
   }
 
@@ -251,7 +251,7 @@ class _AddProductPageState extends State<AddProductPage> {
         ),
         onPressed: _submitForm,
         child: Text(isEditing ? "수정 완료" : "상품 등록",
-            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900)),
       ),
     );
   }

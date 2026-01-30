@@ -74,7 +74,7 @@ class _ProductPageState extends State<ProductPage> {
                                     '$categoryCartCount',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w900,
                                       color: Colors.white,
                                     ),
                                   ),
@@ -90,7 +90,7 @@ class _ProductPageState extends State<ProductPage> {
                           shape: StadiumBorder(side: BorderSide(color: Colors.white.withOpacity(0.5))),
                           labelStyle: TextStyle(
                             color: isSelected ? AppColors.mainColor : Colors.white,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w900,
                             fontSize: 22,
                           ),
                           padding: (categoryCartCount > 0) ?  const EdgeInsets.fromLTRB(16, 10, 7, 10) : EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -127,7 +127,6 @@ class _ProductPageState extends State<ProductPage> {
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 11,
-                              fontWeight: FontWeight.bold,
                             ),
                           )
                         ],
@@ -203,14 +202,14 @@ class _ProductPageState extends State<ProductPage> {
                       children: [
                         Text(
                           p.name,
-                          style: TextStyle(fontSize: 27, fontWeight: FontWeight.w900, color: quantity > 0 ? AppColors.mainColor : Colors.black, height: 1.1),
+                          style: TextStyle(fontSize: 35, fontWeight: FontWeight.w900, color: quantity > 0 ? AppColors.mainColor : Colors.black, height: 1.1),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Text(
                           "${p.price}원",
-                          style: TextStyle(fontSize: 25, color: Colors.grey[700], fontWeight: FontWeight.w600),
+                          style: TextStyle(fontSize: 30, color: Colors.grey[700], fontWeight: FontWeight.w600),
                         ),
                         const Spacer(),
                         Row(
@@ -230,7 +229,7 @@ class _ProductPageState extends State<ProductPage> {
                                   }),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 15),
-                                    child: Text("$quantity", style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                                    child: Text("$quantity", style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w900)),
                                   ),
                                   _buildCircularQtyBtn(Icons.add, Colors.red, () => vm.setQuantity(p.productNumber, quantity + 1)),
                                 ],
@@ -294,7 +293,7 @@ class _ProductPageState extends State<ProductPage> {
             elevation: 4,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
             onPressed: () => _showPaymentMethodDialog(context),
-            label: Text("${vm.getTotalCartPrice()}원 결제하기", style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white)),
+            label: Text("${vm.getTotalCartPrice()}원 결제하기", style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w900, color: Colors.white)),
             icon: const Icon(Icons.payment, color: Colors.white, size: 28),
           ),
         ),
@@ -409,7 +408,7 @@ class _ProductPageState extends State<ProductPage> {
             children: [
               Icon(icon, size: 50, color: color),
               const SizedBox(height: 12),
-              Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
               Text(subtitle, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: color.withOpacity(0.6))),
             ],
           ),
@@ -490,7 +489,7 @@ class _ProductPageState extends State<ProductPage> {
                                     color: isCardPayment
                                         ? Colors.blue
                                         : Colors.orange,
-                                    fontWeight: FontWeight.bold),
+                                    fontWeight: FontWeight.w900),
                               ),
                               const SizedBox(height: 20),
                               Container(
@@ -504,9 +503,9 @@ class _ProductPageState extends State<ProductPage> {
                                   children: [
                                     const Row(
                                       children: [
-                                        Expanded(flex: 3, child: Text("품명", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))),
-                                        Expanded(flex: 1, child: Text("수량", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))),
-                                        Expanded(flex: 2, child: Text("금액", textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))),
+                                        Expanded(flex: 3, child: Text("품명", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18))),
+                                        Expanded(flex: 1, child: Text("수량", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18))),
+                                        Expanded(flex: 2, child: Text("금액", textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18))),
                                       ],
                                     ),
                                     const Divider(height: 20),
@@ -517,7 +516,7 @@ class _ProductPageState extends State<ProductPage> {
                                           children: [
                                             Expanded(flex: 3, child: Text(p.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500))),
                                             Expanded(flex: 1, child: Text("${vm.getQuantity(p.productNumber)}개", textAlign: TextAlign.center, style: const TextStyle(fontSize: 18, color: Colors.grey))),
-                                            Expanded(flex: 2, child: Text("${vm.getTotalPriceWithDiscount(p.productNumber)}원", textAlign: TextAlign.right, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+                                            Expanded(flex: 2, child: Text("${vm.getTotalPriceWithDiscount(p.productNumber)}원", textAlign: TextAlign.right, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900))),
                                           ],
                                         ),
                                       );
@@ -551,7 +550,7 @@ class _ProductPageState extends State<ProductPage> {
                                     textAlign: TextAlign.left,
                                     style: TextStyle(
                                       fontSize: 30,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w900,
                                       color: Colors.black,
                                     ),
                                     decoration: InputDecoration(
@@ -566,14 +565,14 @@ class _ProductPageState extends State<ProductPage> {
                                       ),
                                       fillColor: Colors.white,
                                       labelStyle: TextStyle(
-                                          fontWeight: FontWeight.bold,
+                                          fontWeight: FontWeight.w900,
                                           fontSize: 20,
                                           color: cashFocusNode.hasFocus
                                               ? AppColors.mainColor
                                               : AppColors.mainDarkColor
                                       ),
                                       suffixText: cashController.text.isEmpty ? "" : " 원",
-                                      suffixStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                      suffixStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                                       focusedBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
                                               color: AppColors.mainColor,
@@ -593,7 +592,7 @@ class _ProductPageState extends State<ProductPage> {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      const Text("거스름 돈", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey)),
+                                      const Text("거스름 돈", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.grey)),
                                       Text(
                                         "${change < 0 ? 0 : change} 원",
                                         style: TextStyle(
@@ -654,7 +653,7 @@ class _ProductPageState extends State<ProductPage> {
                                                 "계좌 이체로 결제하기",
                                                 style: TextStyle(
                                                   fontSize: 20,
-                                                  fontWeight: FontWeight.bold,
+                                                  fontWeight: FontWeight.w900,
                                                   color: (isAccountTransfer) ? Colors.white : Colors.black87,
                                                 ),
                                               ),
@@ -710,7 +709,7 @@ class _ProductPageState extends State<ProductPage> {
                                   : "결제 완료 및 저장",
                               style: const TextStyle(
                                   fontSize: 26,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w900,
                                   color: Colors.white)),
                         ),
                       ),
@@ -759,7 +758,7 @@ class _ProductPageState extends State<ProductPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text("현금 입력 패드", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                          const Text("현금 입력 패드", style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900)),
                           IconButton(
                             icon: const Icon(Icons.refresh_rounded, color: Colors.orange, size: 35),
                             onPressed: () => setPadState(() {
@@ -849,7 +848,7 @@ class _ProductPageState extends State<ProductPage> {
                                             "$count 개",
                                             style: TextStyle(
                                               fontSize: 14,
-                                              fontWeight: FontWeight.bold,
+                                              fontWeight: FontWeight.w900,
                                               color: count > 0 ? Colors.white : Colors.grey[700],
                                             ),
                                           ),
@@ -889,7 +888,7 @@ class _ProductPageState extends State<ProductPage> {
                                 Navigator.pop(context);
                               },
                               child: const Text("금액 적용",
-                                  style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold)),
+                                  style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.w900)),
                             ),
                           ),
                         ],

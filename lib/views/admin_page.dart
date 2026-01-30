@@ -39,7 +39,7 @@ class _AdminPageState extends State<AdminPage> {
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         title: const Text("관리자 모드",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22)),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 22)),
         backgroundColor: AppColors.mainColor,
         centerTitle: true,
         elevation: 0,
@@ -124,7 +124,7 @@ class _AdminPageState extends State<AdminPage> {
       children: [
         Text(label, style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 16)),
         const SizedBox(height: 5),
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+        Text(value, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900)),
       ],
     );
   }
@@ -152,7 +152,7 @@ class _AdminPageState extends State<AdminPage> {
               label: Text(category.label),
               labelStyle: TextStyle(
                 color: isSelected ? Colors.white : Colors.grey[700],
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontWeight: isSelected ? FontWeight.w900 : FontWeight.normal,
               ),
               selected: isSelected,
               onSelected: (selected) {
@@ -233,7 +233,7 @@ class _AdminPageState extends State<AdminPage> {
                         children: [
                           Row(
                             children: [
-                              Text(p.category.label, style: TextStyle(color: AppColors.mainColor, fontWeight: FontWeight.bold, fontSize: 12)),
+                              Text(p.category.label, style: TextStyle(color: AppColors.mainColor, fontWeight: FontWeight.w900, fontSize: 12)),
                               const SizedBox(width: 8),
                               const Text("•", style: TextStyle(color: Colors.grey)),
                               const SizedBox(width: 8),
@@ -241,7 +241,7 @@ class _AdminPageState extends State<AdminPage> {
                             ],
                           ),
                           const SizedBox(height: 4),
-                          Text(p.name, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
+                          Text(p.name, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w900)),
                           const SizedBox(height: 4),
                           Text(
                             p.discountQuantity > 0
@@ -284,7 +284,7 @@ class _AdminPageState extends State<AdminPage> {
               backgroundColor: Colors.white,
               elevation: 4,
               icon: Icon(Icons.sync_rounded, color: AppColors.mainColor),
-              label: Text("목록 동기화", style: TextStyle(color: AppColors.mainColor, fontWeight: FontWeight.bold, fontSize: 20)),
+              label: Text("목록 동기화", style: TextStyle(color: AppColors.mainColor, fontWeight: FontWeight.w900, fontSize: 20)),
             ),
           ),
           const SizedBox(width: 12),
@@ -296,7 +296,7 @@ class _AdminPageState extends State<AdminPage> {
               backgroundColor: Colors.orangeAccent,
               elevation: 4,
               icon: const Icon(Icons.add_rounded, color: Colors.white),
-              label: const Text("상품 추가", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+              label: const Text("상품 추가", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20)),
             ),
           ),
         ],
@@ -392,7 +392,7 @@ class _AdminPageState extends State<AdminPage> {
   InputDecoration _inputDecoration(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      labelStyle: TextStyle(fontSize: 18, color: AppColors.mainColor, fontWeight: FontWeight.bold),
+      labelStyle: TextStyle(fontSize: 18, color: AppColors.mainColor, fontWeight: FontWeight.w900),
       prefixIcon: Icon(icon, size: 22),
       filled: true,
       fillColor: const Color(0xFFF1F3F5),
