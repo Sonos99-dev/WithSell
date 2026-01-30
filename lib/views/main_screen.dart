@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project/viewmodels/admin_view_model.dart';
+import 'package:project/viewmodels/sales_history_view_model.dart';
 import 'package:project/views/admin_page.dart';
 import 'package:project/views/app_color.dart';
 import 'package:project/views/sales_history_page.dart';
@@ -32,6 +33,10 @@ class _MainScreenState extends State<MainScreen> {
   ];
 
   void _onItemTapped(int index) {
+    // 🔥 판매 내역 탭(index 1)을 눌렀을 때 처리
+    if (index == 1) {
+      context.read<SalesHistoryViewModel>().selectLatestDate();
+    }
     setState(() {
       _selectedIndex = index;
     });

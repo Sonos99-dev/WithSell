@@ -4,11 +4,41 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SalesHistoryViewModel extends ChangeNotifier {
+  static const String dateFormatStr = 'yyyy-MM-dd';
   List<dynamic> _history = [];
   List<dynamic> get history => _history;
 
+  String? _selectedDate;
+  String? get selectedDate => _selectedDate;
+
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+
+  Map<String, List<dynamic>> get groupedHistory {
+    Map<String, List<dynamic>> grouped = {};
+    for (var record in _history) {
+      String dateKey = DateFormat(dateFormatStr).format(DateTime.parse(record['date']));
+      if (grouped[dateKey] == null) grouped[dateKey] = [];
+      grouped[dateKey]!.add(record);
+    }
+    return grouped;
+  }
+
+  List<String> get sortedDates {
+    final dates = groupedHistory.keys.toList();
+    dates.sort((a, b) => b.compareTo(a)); // 최신순 정렬
+    return dates;
+  }
+
+  List<dynamic> get displayRecords {
+    if (_selectedDate == null) return [];
+    return groupedHistory[_selectedDate] ?? [];
+  }
+
+  void setSelectedDate(String? date) {
+    _selectedDate = date;
+    notifyListeners();
+  }
 
   /// 로컬에서 판매 내역 불러오기
   Future<void> loadHistory() async {
@@ -21,6 +51,7 @@ class SalesHistoryViewModel extends ChangeNotifier {
 
       if (encodedData != null) {
         _history = jsonDecode(encodedData);
+        selectLatestDate();
       } else {
         _history = [];
       }
@@ -32,11 +63,33 @@ class SalesHistoryViewModel extends ChangeNotifier {
     }
   }
 
+  void selectLatestDate() {
+    if (_history.isEmpty) {
+      _selectedDate = null;
+    } else {
+      List<String> allDates = _history.map((item) {
+        return DateFormat(dateFormatStr).format(DateTime.parse(item['date']));
+      }).toList();
+
+      allDates.sort((a, b) => b.compareTo(a)); // 내림차순 정렬 (최신이 위로)
+      _selectedDate = allDates.first;
+    }
+    notifyListeners();
+  }
+
   /// 특정 내역 삭제 (필요시)
   Future<void> deleteHistory(int salesNumber) async {
     _history.removeWhere((item) => item['salesNumber'] == salesNumber);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('sales_history', jsonEncode(_history));
+
+    if (_selectedDate != null) {
+      final dates = groupedHistory.keys.toList();
+      if (!dates.contains(_selectedDate)) {
+        selectLatestDate();
+      }
+    }
+
     notifyListeners();
   }
 
@@ -50,15 +103,15 @@ class SalesHistoryViewModel extends ChangeNotifier {
 
   /// 특정 날짜의 모든 내역 삭제
   Future<void> deleteHistoryByDate(String dateString) async {
-    // 해당 날짜(yyyy-MM-dd)와 일치하지 않는 데이터들만 남김
     _history.removeWhere((item) {
-      String itemDate = DateFormat('yyyy-MM-dd').format(DateTime.parse(item['date']));
+      String itemDate = DateFormat(dateFormatStr).format(DateTime.parse(item['date']));
       return itemDate == dateString;
     });
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('sales_history', jsonEncode(_history));
 
+    selectLatestDate();
     notifyListeners();
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project/views/sales_history_base_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../viewmodels/sales_history_view_model.dart';
@@ -12,8 +13,6 @@ class SalesHistoryPage extends StatefulWidget {
 }
 
 class _SalesHistoryPageState extends State<SalesHistoryPage> {
-  String? selectedDate;
-
   @override
   void initState() {
     super.initState();
@@ -22,33 +21,12 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
     });
   }
 
-  Map<String, List<dynamic>> _groupHistoryByDate(List<dynamic> history) {
-    Map<String, List<dynamic>> grouped = {};
-    for (var record in history) {
-      String dateKey = DateFormat(
-        'yyyy-MM-dd',
-      ).format(DateTime.parse(record['date']));
-      if (grouped[dateKey] == null) grouped[dateKey] = [];
-      grouped[dateKey]!.add(record);
-    }
-    return grouped;
-  }
-
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<SalesHistoryViewModel>();
-    final groupedData = _groupHistoryByDate(vm.history);
-    final sortedDates = groupedData.keys.toList();
-
-    if (selectedDate != null && !sortedDates.contains(selectedDate)) {
-      selectedDate = sortedDates.isNotEmpty ? sortedDates.first : null;
-    } else if (selectedDate == null && sortedDates.isNotEmpty) {
-      selectedDate = sortedDates.first;
-    }
-
-    final displayRecords = selectedDate != null
-        ? groupedData[selectedDate!] ?? []
-        : [];
+    final sortedDates = vm.sortedDates;
+    final currentSelectedDate = vm.selectedDate;
+    final displayRecords = vm.displayRecords;
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -67,7 +45,7 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_sweep, color: Colors.white, size: 28),
-            onPressed: () => _showDeleteDateDialog(context, vm, selectedDate!),
+            onPressed: () => _showDeleteDateDialog(context, vm, currentSelectedDate!),
           ),
         ],
       ),
@@ -105,7 +83,7 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
-                        value: selectedDate,
+                        value: currentSelectedDate,
                         isExpanded: true,
                         icon: Icon(
                           Icons.keyboard_arrow_down,
@@ -125,7 +103,7 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
                               ),
                             )
                             .toList(),
-                        onChanged: (val) => setState(() => selectedDate = val),
+                        onChanged: (val) => vm.setSelectedDate(val),
                       ),
                     ),
                   ),
@@ -363,117 +341,21 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
   ) {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-        child: Container(
-          width: 400,
-          padding: const EdgeInsets.all(30),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(25),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.red[50],
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.delete_sweep_rounded,
-                  color: Colors.redAccent,
-                  size: 50,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                "판매 내역 삭제 ($salesNumber번)",
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.5,
-                  color: Colors.redAccent,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                "해당 판매 기록을 영구히 삭제하시겠습니까?\n이 작업은 취소할 수 없습니다.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.red[400],
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 35),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.red[200]!),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      onPressed: () async {
-                        await vm.deleteHistory(salesNumber);
-                        final newGroupedData = _groupHistoryByDate(vm.history);
-                        final newSortedDates = newGroupedData.keys.toList();
-                        setState(() {
-                          if (!newSortedDates.contains(selectedDate)) {
-                            selectedDate = newSortedDates.isNotEmpty
-                                ? newSortedDates.first
-                                : null;
-                          }
-                        });
-                        if (context.mounted) Navigator.pop(context);
-                      },
-                      child: Text(
-                        "삭제하기",
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.red[400],
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[200],
-                        foregroundColor: Colors.black87,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        "취소",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+      builder: (context) => SalesHistoryBaseDialog(
+          title: "판매 내역 삭제 ($salesNumber번)",
+          content: "해당 판매 기록을 영구히 삭제하시겠습니까?\n이 작업은 취소할 수 없습니다",
+          icon: Icons.delete_sweep_rounded,
+          iconColor: Colors.redAccent,
+          subTextColor: Colors.red[300]!,
+          isDangerDialog: true,
+          onConfirm: () async {
+            await vm.deleteHistory(salesNumber);
+            if (context.mounted) Navigator.pop(context);
+          }
+      )
     );
   }
 
-  // 특정 날짜 삭제 확인 다이얼로그
   void _showDeleteDateDialog(
     BuildContext context,
     SalesHistoryViewModel vm,
@@ -481,107 +363,18 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
   ) {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-        child: Container(
-          width: 400,
-          padding: const EdgeInsets.all(30),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(25),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.mainColor.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.delete_sweep_rounded,
-                  color: Colors.redAccent,
-                  size: 50,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                "날짜 전체 삭제",
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.5,
-                  color: Colors.redAccent,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                "[$date]\n해당 날짜의 모든 판매 기록을 삭제합니다.\n정말로 진행하시겠습니까?",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.red[400],
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 35),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.red[200]!),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      onPressed: () async {
-                        await vm.deleteHistoryByDate(date);
-                        setState(() {
-                          selectedDate = null;
-                        });
-                        if (context.mounted) Navigator.pop(context);
-                      },
-                      child: Text(
-                        "날짜 삭제",
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.red[400],
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[200],
-                        foregroundColor: Colors.black87,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        "취소",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+      builder: (context) => SalesHistoryBaseDialog(
+          title: "날짜 전체 삭제",
+          content: "[$date]\n해당 날짜의 모든 판매 기록을 삭제합니다.\n정말로 진행하시겠습니까?",
+          icon: Icons.delete_sweep_rounded,
+          iconColor: Colors.redAccent,
+          subTextColor: Colors.red[300]!,
+          isDangerDialog: true,
+          onConfirm: () async {
+            await vm.deleteHistoryByDate(date);
+            if (context.mounted) Navigator.pop(context);
+        }
+      )
     );
   }
 
@@ -592,88 +385,21 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
       ) {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-        child: Container(
-          width: 400,
-          padding: const EdgeInsets.all(30),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.orange[50],
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.undo_rounded,
-                  color: Colors.orange,
-                  size: 50,
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                "결제 취소 처리",
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                "해당 내역을 결제 취소 상태로 변경하시겠습니까?\n내역은 유지되지만 매출 합계에서 제외됩니다.",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey, height: 1.5),
-              ),
-              const SizedBox(height: 35),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        foregroundColor: Colors.white,
-                        elevation: 5,
-                        shadowColor: Colors.orangeAccent.withOpacity(0.5),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      onPressed: () {
-                        vm.updateCancelStatus(salesNumber, true);
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("결제가 취소되었습니다.")),
-                        );
-                      },
-                      child: const Text(
-                        "결제 취소",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.black38),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        "돌아가기",
-                        style: TextStyle(fontSize: 18, color: Colors.black54, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+      builder: (context) => SalesHistoryBaseDialog(
+          title: "결제 취소 처리",
+          content: "해당 내역을 결제 취소 상태로 변경하시겠습니까?\n내역은 유지되지만 매출 합계에서 제외됩니다.",
+          icon: Icons.undo_rounded,
+          iconColor: Colors.orange,
+          yesText: "결제 취소",
+          noText: "돌아가기",
+          onConfirm: () async {
+            vm.updateCancelStatus(salesNumber, true);
+            if (context.mounted) Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("결제가 취소되었습니다.")),
+            );
+          }
+      )
     );
   }
 
@@ -684,73 +410,21 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
       ) {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-        child: Container(
-          width: 400,
-          padding: const EdgeInsets.all(30),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: Colors.blue[50], shape: BoxShape.circle),
-                child: const Icon(Icons.restore_rounded, color: Colors.blue, size: 50),
-              ),
-              const SizedBox(height: 24),
-              const Text("결제 내역 복구", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              const Text(
-                "취소된 내역을 다시 정상 판매 상태로\n복구하시겠습니까?",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey, height: 1.5),
-              ),
-              const SizedBox(height: 35),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.mainColor,
-                        foregroundColor: Colors.white,
-                        elevation: 5,
-                        shadowColor: AppColors.mainColor.withOpacity(0.5),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      onPressed: () async {
-                        await vm.updateCancelStatus(salesNumber, false);
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("판매 내역이 복구되었습니다."))
-                        );
-                      },
-                      child: const Text("내역 복구", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.black38),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("돌아가기", style: TextStyle(fontSize: 18, color: Colors.black54, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+      builder: (context) => SalesHistoryBaseDialog(
+          title: "결제 내역 복구",
+          content: "취소된 내역을 다시 판매 완료 상태로\n복구하시겠습니까?",
+          icon: Icons.restore_rounded,
+          iconColor: Colors.blue,
+          yesText: "내역 복구",
+          noText: "돌아가기",
+          onConfirm: () async {
+            vm.updateCancelStatus(salesNumber, false);
+            if (context.mounted) Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("판매 내역이 복구되었습니다.")),
+            );
+          }
+      )
     );
   }
-
 }
