@@ -16,23 +16,10 @@ class _AdminPageState extends State<AdminPage> {
   final TextEditingController _pwController = TextEditingController();
   final String _adminPassword = "0000"; // 초기 비밀번호
 
-  // 헥사코드를 컬러로 변환하는 헬퍼 함수
-  Color _hexToColor(String hexCode) {
-    try {
-      hexCode = hexCode.replaceAll('#', '');
-      if (hexCode.length == 6) {
-        hexCode = 'FF$hexCode';
-      }
-      return Color(int.parse('0x$hexCode'));
-    } catch (e) {
-      return Colors.grey;
-    }
-  }
 
   @override
   void initState() {
     super.initState();
-    // 페이지 진입 시 최신 목록 불러오기
     Future.microtask(() => context.read<AdminViewModel>().loadFromLocal());
   }
 
@@ -190,7 +177,6 @@ class _AdminPageState extends State<AdminPage> {
       separatorBuilder: (context, index) => const Divider(),
       itemBuilder: (context, index) {
         final p = vm.products[index];
-        final Color themeColor = _hexToColor(p.borderColor);
 
         return ListTile(
           onTap: () {
@@ -206,7 +192,7 @@ class _AdminPageState extends State<AdminPage> {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: themeColor,
+              color: Colors.orange,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.grey[300]!),
             ),

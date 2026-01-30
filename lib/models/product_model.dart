@@ -1,4 +1,4 @@
-import 'package:project/models/productCategory.dart' show ProductCategory;
+import 'package:project/models/product_category.dart' show ProductCategory;
 
 class ProductModel {
   final int discountPrice;
@@ -6,7 +6,6 @@ class ProductModel {
   final String name;
   final int price;
   final int productNumber;
-  final String borderColor;
   final String imgUrl;
   final ProductCategory category;
 
@@ -16,7 +15,6 @@ class ProductModel {
     required this.name,
     required this.price,
     required this.productNumber,
-    required this.borderColor,
     required this.imgUrl,
     required this.category,
   });
@@ -29,7 +27,6 @@ class ProductModel {
       name: data['name'] ?? '',
       price: data['price'] ?? 0,
       productNumber: data['productNumber'] ?? 0,
-      borderColor: data['borderColor'] ?? '',
       imgUrl: data['imgUrl'] ?? '',
       category: ProductCategory.values.firstWhere(
             (e) => e.name == (data['category'] ?? 'etc'),
@@ -46,7 +43,6 @@ class ProductModel {
       name: json['name'] ?? '',
       price: json['price'] ?? 0,
       productNumber: json['productNumber'] ?? 0,
-      borderColor: json['borderColor'] ?? '',
       imgUrl: json['imgUrl'] ?? '',
       category: ProductCategory.values.firstWhere(
             (e) => e.name == (json['category'] ?? 'etc'),
@@ -63,7 +59,6 @@ class ProductModel {
       "name": name,
       "price": price,
       "productNumber": productNumber,
-      "borderColor": borderColor,
       "imgUrl": imgUrl,
       "category": category.name,
     };
@@ -88,7 +83,6 @@ class ProductModel {
       name: name ?? this.name,
       price: price ?? this.price,
       productNumber: productNumber ?? this.productNumber,
-      borderColor: borderColor ?? this.borderColor,
       imgUrl: imgUrl ?? this.imgUrl,
       category: category ?? this.category
     );

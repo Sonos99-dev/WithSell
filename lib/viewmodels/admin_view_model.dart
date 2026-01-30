@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
-import 'package:project/models/productCategory.dart';
+import 'package:project/models/product_category.dart';
 import 'package:project/models/product_model.dart';
 import 'package:project/repositories/product_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -56,7 +56,6 @@ class AdminViewModel extends ChangeNotifier {
   Future<void> addProduct({
     required String name,
     required int price,
-    required String borderColor,
     required int discountPrice,
     required int discountQuantity,
     required String imgUrl,
@@ -72,7 +71,6 @@ class AdminViewModel extends ChangeNotifier {
         productNumber: newNumber,
         name: name,
         price: price,
-        borderColor: borderColor,
         discountPrice: discountPrice,
         discountQuantity: discountQuantity,
         imgUrl: imgUrl,
@@ -102,7 +100,6 @@ class AdminViewModel extends ChangeNotifier {
     required int productNumber,
     required String name,
     required int price,
-    required String borderColor,
     required int discountPrice,
     required int discountQuantity,
     required String imgUrl,
@@ -114,7 +111,6 @@ class AdminViewModel extends ChangeNotifier {
         productNumber: productNumber,
         name: name,
         price: price,
-        borderColor: borderColor,
         discountPrice: discountPrice,
         discountQuantity: discountQuantity,
         imgUrl: imgUrl,

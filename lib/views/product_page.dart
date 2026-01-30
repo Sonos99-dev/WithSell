@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:project/models/productCategory.dart';
+import 'package:project/models/product_category.dart';
 import 'package:project/viewmodels/product_view_model.dart';
 import 'package:project/viewmodels/sales_history_view_model.dart';
 import 'package:project/views/app_color.dart';
@@ -286,7 +286,7 @@ class _ProductPageState extends State<ProductPage> {
       ),
       floatingActionButton: Visibility(
         visible: filteredProducts.isNotEmpty && vm.getTotalCartPrice() != 0,
-        child: Container(
+        child: SizedBox(
           width: MediaQuery.of(context).size.width * 0.95,
           height: 80,
           child: FloatingActionButton.extended(
@@ -521,7 +521,7 @@ class _ProductPageState extends State<ProductPage> {
                                           ],
                                         ),
                                       );
-                                    }).toList(),
+                                    }),
                                     const Divider(height: 30),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
