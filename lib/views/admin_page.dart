@@ -1,7 +1,10 @@
-import 'package:flutter/material.dart';import 'package:project/viewmodels/admin_view_model.dart';
+import 'package:flutter/material.dart';
+import 'package:project/models/product_category.dart';
+import 'package:project/viewmodels/admin_view_model.dart';
 import 'package:project/viewmodels/product_view_model.dart';
 import 'package:project/views/add_product_page.dart';
 import 'package:project/views/app_color.dart';
+import 'package:project/views/sales_history_base_dialog.dart' show SalesHistoryBaseDialog;
 import 'package:provider/provider.dart';
 
 class AdminPage extends StatefulWidget {
@@ -14,8 +17,9 @@ class AdminPage extends StatefulWidget {
 class _AdminPageState extends State<AdminPage> {
   bool _isAuthenticated = false;
   final TextEditingController _pwController = TextEditingController();
-  final String _adminPassword = "0000"; // 초기 비밀번호
+  final String _adminPassword = "0000";
 
+  ProductCategory _selectedCategory = ProductCategory.all;
 
   @override
   void initState() {
@@ -25,24 +29,24 @@ class _AdminPageState extends State<AdminPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. 비밀번호 인증 전 화면
-    if (!_isAuthenticated) {
-      return _buildAuthView();
-    }
+    if (!_isAuthenticated) return _buildAuthView();
 
-    // 2. 인증 후 관리자 화면
     final adminVm = context.watch<AdminViewModel>();
+    final filteredProducts = _selectedCategory == ProductCategory.all
+        ? adminVm.products
+        : adminVm.products.where((p) => p.category == _selectedCategory).toList();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         title: const Text("관리자 모드",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22)),
         backgroundColor: AppColors.mainColor,
         centerTitle: true,
+        elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
+            icon: const Icon(Icons.logout_rounded, color: Colors.white),
             onPressed: () => setState(() => _isAuthenticated = false),
           )
         ],
@@ -51,97 +55,269 @@ class _AdminPageState extends State<AdminPage> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            color: Colors.grey[100],
-            child: Text(
-              "등록된 상품 총 ${adminVm.products.length}개 (클릭하여 수정)",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Expanded(child: _buildProductList(adminVm)),
+          _buildDashboard(adminVm),
+          _buildCategoryBar(),
+          Expanded(child: _buildProductList(adminVm, filteredProducts)),
         ],
       ),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+      floatingActionButton: _buildFabMenu(context, adminVm),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Widget _buildDashboard(AdminViewModel vm) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 25),
+      decoration: BoxDecoration(
+        color: AppColors.mainColor,
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          SizedBox(
-            width: 220,
-            height: 90,
-            child: FloatingActionButton.extended(
-              heroTag: "add_page",
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AddProductPage()),
-                );
+          _buildStatItem("전체 상품", "${vm.products.length}개"),
+          _buildStatDivider(),
+          _buildStatItem("카테고리", "${vm.products.map((e) => e.category).toSet().length}종"),
+          _buildStatDivider(),
+          _buildStatItem("할인 적용", "${vm.products.where((e) => e.discountQuantity > 0).length}건"),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, String value) {
+    return Column(
+      children: [
+        Text(label, style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14)),
+        const SizedBox(height: 5),
+        Text(value, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+
+  Widget _buildStatDivider() {
+    return Container(width: 1, height: 30, color: Colors.white.withOpacity(0.3));
+  }
+
+  Widget _buildCategoryBar() {
+    return Container(
+      height: 65,
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: ProductCategory.values.length,
+        itemBuilder: (context, index) {
+          final category = ProductCategory.values[index];
+          final isSelected = _selectedCategory == category;
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ChoiceChip(
+              showCheckmark: false,
+              label: Text(category.label),
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.white : Colors.grey[700],
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+              selected: isSelected,
+              onSelected: (selected) {
+                if (selected) {
+                  setState(() => _selectedCategory = category);
+                }
               },
-              backgroundColor: Colors.orangeAccent,
-              icon: const Icon(Icons.add, color: Colors.white, size: 40,),
-              label: const Text("새 상품 등록", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+              selectedColor: AppColors.mainColor,
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+                side: BorderSide(
+                  color: isSelected ? AppColors.mainColor : Colors.grey[300]!,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildProductList(AdminViewModel vm, List<dynamic> filteredList) {
+    if (filteredList.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey[300]),
+            const SizedBox(height: 16),
+            Text(
+              _selectedCategory == ProductCategory.all
+                  ? "등록된 상품이 없습니다."
+                  : "${_selectedCategory.label} 카테고리에 상품이 없습니다.",
+              style: const TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 5, 16, 120),
+      itemCount: filteredList.length,
+      itemBuilder: (context, index) {
+        final p = filteredList[index];
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4)),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => AddProductPage(product: p))),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 55,
+                      height: 55,
+                      decoration: BoxDecoration(
+                        color: AppColors.mainColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Icon(Icons.edit_note_rounded, color: AppColors.mainColor, size: 30),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(p.category.label, style: TextStyle(color: AppColors.mainColor, fontWeight: FontWeight.bold, fontSize: 12)),
+                              const SizedBox(width: 8),
+                              const Text("•", style: TextStyle(color: Colors.grey)),
+                              const SizedBox(width: 8),
+                              Text("No.${p.productNumber}", style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(p.name, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 4),
+                          Text(
+                            p.discountQuantity > 0
+                                ? "${p.price}원 (할인: ${p.discountQuantity}개↑ -${p.discountPrice}원)"
+                                : "${p.price}원 (할인 없음)",
+                            style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
+                      onPressed: () => _showDeleteConfirm(context, vm, p.productNumber, p.name),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-          const SizedBox(width: 12),
-          SizedBox(
-            width: 220,
-            height: 90,
+        );
+      },
+    );
+  }
+
+  Widget _buildFabMenu(BuildContext context, AdminViewModel vm) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        children: [
+          Expanded(
             child: FloatingActionButton.extended(
               heroTag: "sync_data",
               onPressed: () async {
-                await adminVm.syncAndSave();
+                await vm.syncAndSave();
                 if (context.mounted) {
-                  context.read<ProductViewModel>().setProducts(adminVm.products);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("서버와 동기화되었습니다.")),
-                  );
+                  context.read<ProductViewModel>().setProducts(vm.products);
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("서버와 동기화되었습니다."), behavior: SnackBarBehavior.floating));
                 }
               },
-              backgroundColor: AppColors.mainColor,
-              icon: const Icon(Icons.sync, color: Colors.white, size: 40),
-              label: const Text("목록 동기화", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+              backgroundColor: Colors.white,
+              elevation: 4,
+              icon: Icon(Icons.sync_rounded, color: AppColors.mainColor),
+              label: Text("목록 동기화", style: TextStyle(color: AppColors.mainColor, fontWeight: FontWeight.bold, fontSize: 16)),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 1,
+            child: FloatingActionButton.extended(
+              heroTag: "add_page",
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AddProductPage())),
+              backgroundColor: Colors.orangeAccent,
+              elevation: 4,
+              icon: const Icon(Icons.add_rounded, color: Colors.white),
+              label: const Text("상품 추가", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
             ),
           ),
         ],
       ),
     );
   }
-
-  // 비밀번호 입력 화면
+  
   Widget _buildAuthView() {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("관리자 인증", style: TextStyle(color: Colors.white)),
-        backgroundColor: AppColors.mainColor,
-      ),
+      backgroundColor: Colors.white,
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(40.0),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.lock_outline, size: 80, color: Colors.grey),
-              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(color: AppColors.mainColor.withOpacity(0.1), shape: BoxShape.circle),
+                child: Icon(Icons.admin_panel_settings_rounded, size: 80, color: AppColors.mainColor),
+              ),
+              const SizedBox(height: 30),
+              const Text("관리자 인증", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              const Text("안전을 위해 관리자 비밀번호를 입력해주세요.", style: TextStyle(color: Colors.grey)),
+              const SizedBox(height: 40),
               TextField(
                 controller: _pwController,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: "관리자 비밀번호",
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.password),
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 24, letterSpacing: 10),
+                decoration: InputDecoration(
+                  hintText: "••••",
+                  hintStyle: const TextStyle(letterSpacing: 10, color: Colors.grey),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                 ),
                 keyboardType: TextInputType.number,
                 onSubmitted: (_) => _checkPassword(),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: _checkPassword,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.mainColor,
-                  minimumSize: const Size(double.infinity, 55),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  minimumSize: const Size(double.infinity, 60),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  elevation: 0,
                 ),
-                child: const Text("접속하기", style: TextStyle(color: Colors.white, fontSize: 18)),
+                child: const Text("인증 및 접속", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
               )
             ],
           ),
@@ -155,84 +331,28 @@ class _AdminPageState extends State<AdminPage> {
       setState(() => _isAuthenticated = true);
       _pwController.clear();
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("비밀번호가 일치하지 않습니다."), backgroundColor: Colors.red),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("비밀번호가 일치하지 않습니다."), backgroundColor: Colors.red));
     }
   }
 
-  // 상품 리스트 뷰
-  Widget _buildProductList(AdminViewModel vm) {
-    if (vm.products.isEmpty) {
-      return const Center(child: Text("상품이 없습니다. 동기화 버튼을 눌러보세요."));
-    }
-    return ListView.separated(
-      padding: const EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: 100,
-      ),
-      itemCount: vm.products.length,
-      separatorBuilder: (context, index) => const Divider(),
-      itemBuilder: (context, index) {
-        final p = vm.products[index];
-
-        return ListTile(
-          onTap: () {
-            // 상품 클릭 시 수정 페이지로 이동하며 기존 데이터 전달
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AddProductPage(product: p),
-              ),
-            );
-          },
-          leading: Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.orange,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: const Center(
-              child: Icon(Icons.edit, color: Colors.white, size: 20),
-            ),
-          ),
-          title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-          subtitle: Text("기본가: ${p.price}원 / ${p.discountQuantity}개 구매 시 ${p.discountPrice}원 할인 적용중"),
-          trailing: IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-            onPressed: () => _showDeleteConfirm(context, vm, p.productNumber, p.name),
-          ),
-        );
-      },
-    );
-  }
-
-  // 삭제 확인 다이얼로그
   void _showDeleteConfirm(BuildContext context, AdminViewModel vm, int id, String name) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("상품 삭제"),
-        content: Text("'$name' 상품을 영구 삭제하시겠습니까?"),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("취소")),
-          TextButton(
-            onPressed: () async {
-              await vm.deleteProduct(id);
-              if (context.mounted) {
-                // 삭제 후 메인 화면 데이터 갱신
-                context.read<ProductViewModel>().setProducts(vm.products);
-                Navigator.pop(context);
-              }
-            },
-            child: const Text("삭제", style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+      builder: (context) => SalesHistoryBaseDialog(
+          title: "상품 삭제",
+          content: "'$name' 상품을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.",
+          icon: Icons.delete_sweep_rounded,
+          iconColor: Colors.redAccent,
+          subTextColor: Colors.red[300]!,
+          isDangerDialog: true,
+          onConfirm: () async {
+            await vm.deleteProduct(id);
+            if (context.mounted) {
+              context.read<ProductViewModel>().setProducts(vm.products);
+              Navigator.pop(context);
+            }
+          }
+      )
     );
   }
 }
