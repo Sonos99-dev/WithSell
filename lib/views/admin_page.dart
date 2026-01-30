@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:project/models/product_category.dart';
 import 'package:project/viewmodels/admin_auth_view_model.dart';
 import 'package:project/viewmodels/admin_view_model.dart';
@@ -323,13 +324,21 @@ class _AdminPageState extends State<AdminPage> {
               controller: newController,
               obscureText: true,
               keyboardType: TextInputType.number,
-              decoration: _inputDecoration("새 비밀번호", Icons.vpn_key_outlined),
+              maxLength: 4,
+              enableInteractiveSelection: false,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              style: const TextStyle(fontSize: 20, letterSpacing: 8),
+              decoration: _inputDecoration("새 비밀번호 (4자리)", Icons.vpn_key_outlined),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: confirmPwController,
               obscureText: false,
               keyboardType: TextInputType.number,
+              maxLength: 4,
+              enableInteractiveSelection: false,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              style: const TextStyle(fontSize: 20, letterSpacing: 8),
               decoration: _inputDecoration("비밀번호 확인", Icons.check),
             ),
           ],
@@ -367,7 +376,12 @@ class _AdminPageState extends State<AdminPage> {
       prefixIcon: Icon(icon, size: 22),
       filled: true,
       fillColor: const Color(0xFFF1F3F5),
+      counterText: "",
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: const BorderSide(color: AppColors.mainColor, width: 1.5),
+      ),
     );
   }
 }

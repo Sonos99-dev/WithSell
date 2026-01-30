@@ -45,16 +45,24 @@ class _AdminAuthViewState extends State<AdminAuthView> {
               width: 250,
               child: TextField(
                 controller: _pwController,
+                maxLength: 4,
                 obscureText: true,
                 textAlign: TextAlign.center,
                 keyboardType: TextInputType.number,
+                enableInteractiveSelection: false,
                 decoration: InputDecoration(
                   hintText: "비밀번호 입력",
                   filled: true,
                   fillColor: Colors.grey[100],
+                  counterText: "",
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
                 ),
                 onSubmitted: (_) => _handleAuth(),
+                onChanged: (value) {
+                  if (value.length == 4) {
+                    _handleAuth();
+                  }
+                },
               ),
             ),
             const SizedBox(height: 20),
