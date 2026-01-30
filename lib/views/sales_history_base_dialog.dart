@@ -10,6 +10,7 @@ class SalesHistoryBaseDialog extends StatelessWidget {
   final bool isDangerDialog;
   final String yesText;
   final String noText;
+  final Widget? customContent;
 
   const SalesHistoryBaseDialog({
     super.key,
@@ -22,6 +23,7 @@ class SalesHistoryBaseDialog extends StatelessWidget {
     this.isDangerDialog = false,
     this.yesText = "확인",
     this.noText = "취소",
+    this.customContent
   });
 
   @override
@@ -44,6 +46,10 @@ class SalesHistoryBaseDialog extends StatelessWidget {
             Text(title, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: iconColor)),
             const SizedBox(height: 12),
             Text(content, textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: subTextColor, height: 1.5)),
+            if (customContent != null) ...[
+              const SizedBox(height: 20),
+              customContent!,
+            ],
             const SizedBox(height: 35),
             Row(
               children: [
@@ -51,7 +57,7 @@ class SalesHistoryBaseDialog extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: onConfirm,
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: isDangerDialog ? Colors.transparent : iconColor,
+                        backgroundColor: isDangerDialog ? Colors.white : iconColor,
                         side: isDangerDialog ? BorderSide(color: iconColor, width: 1.5) : BorderSide.none,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 16),

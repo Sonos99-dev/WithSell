@@ -1,6 +1,7 @@
 import 'package:firebase_app_check/firebase_app_check.dart' show FirebaseAppCheck, AndroidProvider;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:project/viewmodels/admin_auth_view_model.dart';
 import 'package:project/viewmodels/admin_view_model.dart';
 import 'package:project/viewmodels/sales_history_view_model.dart';
 import 'package:project/views/main_screen.dart';
@@ -38,6 +39,7 @@ void main() async {
         ChangeNotifierProvider<ProductViewModel>.value(value: productVM),
         ChangeNotifierProvider<AdminViewModel>.value(value: adminVM),
         ChangeNotifierProvider<SalesHistoryViewModel>.value(value: salesVM),
+        ChangeNotifierProvider(create: (_) => AdminAuthViewModel()),
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,

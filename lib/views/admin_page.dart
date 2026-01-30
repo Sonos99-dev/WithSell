@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:project/models/product_category.dart';
+import 'package:project/viewmodels/admin_auth_view_model.dart';
 import 'package:project/viewmodels/admin_view_model.dart';
 import 'package:project/viewmodels/product_view_model.dart';
 import 'package:project/views/add_product_page.dart';
+import 'package:project/views/admin_auth_view.dart';
 import 'package:project/views/app_color.dart';
 import 'package:project/views/sales_history_base_dialog.dart' show SalesHistoryBaseDialog;
 import 'package:provider/provider.dart';
@@ -16,8 +18,6 @@ class AdminPage extends StatefulWidget {
 
 class _AdminPageState extends State<AdminPage> {
   bool _isAuthenticated = false;
-  final TextEditingController _pwController = TextEditingController();
-  final String _adminPassword = "0000";
 
   ProductCategory _selectedCategory = ProductCategory.all;
 
@@ -29,7 +29,11 @@ class _AdminPageState extends State<AdminPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_isAuthenticated) return _buildAuthView();
+    if (!_isAuthenticated) {
+      return AdminAuthView(
+        onAuthenticated: () => setState(() => _isAuthenticated = true),
+      );
+    }
 
     final adminVm = context.watch<AdminViewModel>();
     final filteredProducts = _selectedCategory == ProductCategory.all
@@ -46,8 +50,15 @@ class _AdminPageState extends State<AdminPage> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout_rounded, color: Colors.white),
+            icon: const Icon(Icons.settings, color: Colors.white, size: 30,),
+            onPressed: () => _showChangePasswordDialog(context),
+            tooltip: '비밀번호 변경',
+          ),
+          const SizedBox(width: 4),
+          IconButton(
+            icon: const Icon(Icons.logout_rounded, color: Colors.white, size: 30,),
             onPressed: () => setState(() => _isAuthenticated = false),
+            tooltip: '로그아웃',
           )
         ],
       ),
@@ -81,8 +92,6 @@ class _AdminPageState extends State<AdminPage> {
         children: [
           _buildStatItem("전체 상품", "${vm.products.length}개"),
           _buildStatDivider(),
-          _buildStatItem("카테고리", "${vm.products.map((e) => e.category).toSet().length}종"),
-          _buildStatDivider(),
           _buildStatItem("할인 적용", "${vm.products.where((e) => e.discountQuantity > 0).length}건"),
         ],
       ),
@@ -92,9 +101,9 @@ class _AdminPageState extends State<AdminPage> {
   Widget _buildStatItem(String label, String value) {
     return Column(
       children: [
-        Text(label, style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14)),
+        Text(label, style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 16)),
         const SizedBox(height: 5),
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+        Text(value, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -215,7 +224,7 @@ class _AdminPageState extends State<AdminPage> {
                           const SizedBox(height: 4),
                           Text(
                             p.discountQuantity > 0
-                                ? "${p.price}원 (할인: ${p.discountQuantity}개↑ -${p.discountPrice}원)"
+                                ? "${p.price}원 (${p.discountQuantity}개 구매 시 ${p.discountPrice}원 할인 적용중)"
                                 : "${p.price}원 (할인 없음)",
                             style: TextStyle(color: Colors.grey[600], fontSize: 14),
                           ),
@@ -273,67 +282,6 @@ class _AdminPageState extends State<AdminPage> {
       ),
     );
   }
-  
-  Widget _buildAuthView() {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(40.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(color: AppColors.mainColor.withOpacity(0.1), shape: BoxShape.circle),
-                child: Icon(Icons.admin_panel_settings_rounded, size: 80, color: AppColors.mainColor),
-              ),
-              const SizedBox(height: 30),
-              const Text("관리자 인증", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
-              const Text("안전을 위해 관리자 비밀번호를 입력해주세요.", style: TextStyle(color: Colors.grey)),
-              const SizedBox(height: 40),
-              TextField(
-                controller: _pwController,
-                obscureText: true,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 24, letterSpacing: 10),
-                decoration: InputDecoration(
-                  hintText: "••••",
-                  hintStyle: const TextStyle(letterSpacing: 10, color: Colors.grey),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
-                ),
-                keyboardType: TextInputType.number,
-                onSubmitted: (_) => _checkPassword(),
-              ),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: _checkPassword,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.mainColor,
-                  minimumSize: const Size(double.infinity, 60),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  elevation: 0,
-                ),
-                child: const Text("인증 및 접속", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _checkPassword() {
-    if (_pwController.text == _adminPassword) {
-      setState(() => _isAuthenticated = true);
-      _pwController.clear();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("비밀번호가 일치하지 않습니다."), backgroundColor: Colors.red));
-    }
-  }
 
   void _showDeleteConfirm(BuildContext context, AdminViewModel vm, int id, String name) {
     showDialog(
@@ -353,6 +301,73 @@ class _AdminPageState extends State<AdminPage> {
             }
           }
       )
+    );
+  }
+
+  void _showChangePasswordDialog(BuildContext context) {
+    final newController = TextEditingController();
+    final confirmPwController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => SalesHistoryBaseDialog(
+        title: "비밀번호 변경",
+        content: "새로운 비밀번호를 입력해주세요.",
+        icon: Icons.password_rounded,
+        iconColor: Colors.orangeAccent,
+        customContent: Column( // SalesHistoryBaseDialog에 customContent가 있다면 활용
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            TextField(
+              controller: newController,
+              obscureText: true,
+              keyboardType: TextInputType.number,
+              decoration: _inputDecoration("새 비밀번호", Icons.vpn_key_outlined),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: confirmPwController,
+              obscureText: false,
+              keyboardType: TextInputType.number,
+              decoration: _inputDecoration("비밀번호 확인", Icons.check),
+            ),
+          ],
+        ),
+        onConfirm: () async {
+          final authVm = context.read<AdminAuthViewModel>();
+          if (newController.text.trim().isEmpty || confirmPwController.text.trim().isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("사용할 비밀번호를 입력해주세요.")),
+            );
+            return;
+          }
+          bool success = await authVm.updatePassword(newController.text, confirmPwController.text);
+          if (context.mounted) {
+            if (success) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("비밀번호가 성공적으로 변경되었습니다.")),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("두 입력칸 모두 비밀번호를 동일하게 입력해주세요")),
+              );
+            }
+          }
+        },
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(fontSize: 18, color: AppColors.mainColor, fontWeight: FontWeight.bold),
+      prefixIcon: Icon(icon, size: 22),
+      filled: true,
+      fillColor: const Color(0xFFF1F3F5),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
     );
   }
 }
