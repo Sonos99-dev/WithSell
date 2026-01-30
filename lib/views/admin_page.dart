@@ -7,6 +7,7 @@ import 'package:project/viewmodels/product_view_model.dart';
 import 'package:project/views/add_product_page.dart';
 import 'package:project/views/admin_auth_view.dart';
 import 'package:project/views/app_color.dart';
+import 'package:project/views/common_snack_bar.dart';
 import 'package:project/views/sales_history_base_dialog.dart' show SalesHistoryBaseDialog;
 import 'package:provider/provider.dart';
 
@@ -278,7 +279,7 @@ class _AdminPageState extends State<AdminPage> {
                 await vm.syncAndSave();
                 if (context.mounted) {
                   context.read<ProductViewModel>().setProducts(vm.products);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("서버와 동기화되었습니다."), behavior: SnackBarBehavior.floating));
+                  CommonSnackBar.show(context, message: "서버와 동기화되었습니다.");
                 }
               },
               backgroundColor: Colors.white,
@@ -368,28 +369,20 @@ class _AdminPageState extends State<AdminPage> {
           String newPw = newController.text.trim();
           String confirmPw = confirmPwController.text.trim();
           if (newPw.isEmpty || confirmPw.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("사용할 비밀번호를 입력해주세요.")),
-            );
+            CommonSnackBar.show(context, message: "사용할 비밀번호를 입력해주세요.", isError: true);
             return;
           }
           if (newPw.length != 4) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("비밀번호는 반드시 4자리여야 합니다."), backgroundColor: Colors.redAccent),
-            );
+            CommonSnackBar.show(context, message: "비밀번호는 반드시 4자리여야 합니다.", isError: true);
             return;
           }
           bool success = await authVm.updatePassword(newPw, confirmPw);
           if (context.mounted) {
             if (success) {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("비밀번호가 성공적으로 변경되었습니다.")),
-              );
+              CommonSnackBar.show(context, message: "비밀번호가 성공적으로 변경되었습니다.");
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("두 입력칸 모두 비밀번호를 동일하게 입력해주세요"), backgroundColor: Colors.redAccent,),
-              );
+              CommonSnackBar.show(context, message: "두 입력칸 모두 비밀번호를 동일하게 입력해주세요", isError: true);
             }
           }
         },

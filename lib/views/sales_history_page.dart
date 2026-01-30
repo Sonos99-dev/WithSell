@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project/viewmodels/admin_auth_view_model.dart';
+import 'package:project/views/common_snack_bar.dart';
 import 'package:project/views/sales_history_base_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -402,9 +403,7 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
           onConfirm: () async {
             vm.updateCancelStatus(salesNumber, true);
             if (context.mounted) Navigator.pop(context);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("결제가 취소되었습니다.")),
-            );
+            CommonSnackBar.show(context, message: "결제가 취소되었습니다.");
           }
       )
     );
@@ -427,9 +426,7 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
           onConfirm: () async {
             vm.updateCancelStatus(salesNumber, false);
             if (context.mounted) Navigator.pop(context);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("판매 내역이 복구되었습니다.")),
-            );
+            CommonSnackBar.show(context, message: "판매 내역이 복구되었습니다.");
           }
       )
     );
@@ -474,12 +471,7 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
             Navigator.pop(context);
             onSuccess();
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("비밀번호가 일치하지 않습니다."),
-                backgroundColor: Colors.red,
-              ),
-            );
+            CommonSnackBar.show(context, message: "비밀번호가 일치하지 않습니다.", isError: true);
           }
         },
       ),

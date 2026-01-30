@@ -6,6 +6,7 @@ import 'package:project/models/product_category.dart';
 import 'package:project/viewmodels/product_view_model.dart';
 import 'package:project/viewmodels/sales_history_view_model.dart';
 import 'package:project/views/app_color.dart';
+import 'package:project/views/common_snack_bar.dart';
 import 'package:provider/provider.dart';
 
 class ProductPage extends StatefulWidget {
@@ -700,7 +701,7 @@ class _ProductPageState extends State<ProductPage> {
                             if (context.mounted) {
                               context.read<SalesHistoryViewModel>().loadHistory();
                               Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("결제가 정상적으로 완료되었습니다.")));
+                              CommonSnackBar.show(context, message: "결제가 정상적으로 완료되었습니다.");
                             }
                           },
                           child: Text(

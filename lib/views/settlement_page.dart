@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:project/viewmodels/sales_history_view_model.dart';
 import 'package:project/viewmodels/settlement_view_model.dart';
 import 'package:project/views/app_color.dart';
+import 'package:project/views/common_snack_bar.dart';
 import 'package:provider/provider.dart';
 
 class SettlementPage extends StatefulWidget {
@@ -77,19 +78,11 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
     try {
       await vm.syncWithCloud(history);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("데이터가 동기화되었습니다.")),
-        );
+        CommonSnackBar.show(context, message: "데이터가 동기화되었습니다.");
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.redAccent,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        CommonSnackBar.show(context, message: e.toString(), isError: true);
       }
     } finally {
       if (mounted) {

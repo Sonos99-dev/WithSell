@@ -4,6 +4,7 @@ import 'package:project/viewmodels/sales_history_view_model.dart';
 import 'package:project/viewmodels/settlement_view_model.dart';
 import 'package:project/views/admin_page.dart';
 import 'package:project/views/app_color.dart';
+import 'package:project/views/common_snack_bar.dart';
 import 'package:project/views/sales_history_page.dart';
 import 'package:project/views/settlement_page.dart';
 import 'product_page.dart';
@@ -61,9 +62,7 @@ class _MainScreenState extends State<MainScreen> {
           _lastBackPressed = now;
 
           ScaffoldMessenger.of(context).clearSnackBars();
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('한 번 더 누르면 앱이 종료됩니다')));
+          CommonSnackBar.show(context, message: '한 번 더 누르면 앱이 종료됩니다');
           return;
         }
         SystemNavigator.pop();

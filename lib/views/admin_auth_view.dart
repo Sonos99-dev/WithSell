@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:project/viewmodels/admin_auth_view_model.dart';
 import 'package:provider/provider.dart';
 import 'app_color.dart';
+import 'common_snack_bar.dart';
 
 class AdminAuthView extends StatefulWidget {
   final Function() onAuthenticated;
@@ -20,9 +21,7 @@ class _AdminAuthViewState extends State<AdminAuthView> {
     if (authVm.checkPassword(_pwController.text)) {
       widget.onAuthenticated();
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("비밀번호가 일치하지 않습니다."), backgroundColor: Colors.red),
-      );
+      CommonSnackBar.show(context, message: "비밀번호가 일치하지 않습니다.", isError: true);
     }
     _pwController.clear();
   }

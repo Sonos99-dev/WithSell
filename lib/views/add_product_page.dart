@@ -3,6 +3,7 @@ import 'package:project/models/product_category.dart';
 import 'package:project/models/product_model.dart';
 import 'package:project/viewmodels/admin_view_model.dart';
 import 'package:project/views/app_color.dart';
+import 'package:project/views/common_snack_bar.dart';
 import 'package:provider/provider.dart';
 
 class AddProductPage extends StatefulWidget {
@@ -285,9 +286,7 @@ class _AddProductPageState extends State<AddProductPage> {
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(isEditing ? "상품이 수정되었습니다." : "상품이 성공적으로 등록되었습니다."), behavior: SnackBarBehavior.floating,)
-        );
+        CommonSnackBar.show(context, message: isEditing ? "상품이 수정되었습니다." : "상품이 성공적으로 등록되었습니다.");
       }
     }
   }
