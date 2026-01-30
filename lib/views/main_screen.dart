@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:project/viewmodels/sales_history_view_model.dart';
+import 'package:project/viewmodels/settlement_view_model.dart';
 import 'package:project/views/admin_page.dart';
 import 'package:project/views/app_color.dart';
 import 'package:project/views/sales_history_page.dart';
+import 'package:project/views/settlement_page.dart';
 import 'product_page.dart';
 import 'package:provider/provider.dart';
 
@@ -21,7 +23,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _pages = [
     const ProductPage(), // 1번: 기존 상품 페이지
     const SalesHistoryPage(), // 2번: 검색 (추후 분리)
-    const Center(child: Text('장바구니')), // 3번: 장바구니 (추후 분리)
+    const SettlementPage(), // 3번: 장바구니 (추후 분리)
     const AdminPage(), // 4번: 마이페이지 (추후 분리)
   ];
 
@@ -30,6 +32,14 @@ class _MainScreenState extends State<MainScreen> {
     if (index == 1) {
       context.read<SalesHistoryViewModel>().selectLatestDate();
     }
+    if (index == 2) { // 🔥 정산 탭 클릭 시 초기화
+      final salesVm = context.read<SalesHistoryViewModel>();
+      final settlementVm = context.read<SettlementViewModel>();
+
+      settlementVm.updateMyLocalData(salesVm.history);
+      settlementVm.resetSelection();
+      }
+
     setState(() {
       _selectedIndex = index;
     });

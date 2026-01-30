@@ -149,7 +149,7 @@ class _AddProductPageState extends State<AddProductPage> {
                   borderRadius: BorderRadius.circular(15),
                   border: Border.all(color: Colors.grey.withOpacity(0.2)),
                 ),
-                child: Wrap( // 텍스트와 필드를 자연스럽게 연결
+                child: Wrap(
                   alignment: WrapAlignment.center,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   spacing: 8,

@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:project/viewmodels/admin_auth_view_model.dart';
 import 'package:project/viewmodels/admin_view_model.dart';
 import 'package:project/viewmodels/sales_history_view_model.dart';
+import 'package:project/viewmodels/settlement_view_model.dart';
 import 'package:project/views/main_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,15 +37,20 @@ This Font Software is licensed under the SIL Open Font License, Version 1.1.
   // 1. 필요한 서비스 및 리포지토리 준비
   final firestoreService = FireStoreService();
   final productRepo = ProductRepository(firestoreService);
+  final prefs = await SharedPreferences.getInstance();
 
   // 2. ViewModel 객체 생성
   final adminVM = AdminViewModel(productRepo);
   final productVM = ProductViewModel();
-  final salesVM = SalesHistoryViewModel();
-  final prefs = await SharedPreferences.getInstance();
+  final salesVM = SalesHistoryViewModel(prefs);
+  final settlementVM = SettlementViewModel(prefs);
+
 
   await adminVM.loadFromLocal(prefs);
   productVM.setProducts(adminVM.products);
+
+  await salesVM.loadHistory();
+  await settlementVM.init(salesVM.history);
   final initialPw = prefs.getString("admin_password") ?? "0000";
 
   runApp(
@@ -54,6 +60,7 @@ This Font Software is licensed under the SIL Open Font License, Version 1.1.
         ChangeNotifierProvider<AdminViewModel>.value(value: adminVM),
         ChangeNotifierProvider<SalesHistoryViewModel>.value(value: salesVM),
         ChangeNotifierProvider(create: (_) => AdminAuthViewModel(initialPw)),
+        ChangeNotifierProvider<SettlementViewModel>.value(value: settlementVM),
       ],
       child: MaterialApp(
         theme: ThemeData(

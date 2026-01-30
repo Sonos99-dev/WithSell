@@ -7,6 +7,9 @@ class SalesHistoryViewModel extends ChangeNotifier {
   static const String dateFormatStr = 'yyyy-MM-dd';
   List<dynamic> _history = [];
   List<dynamic> get history => _history;
+  final SharedPreferences _prefs;
+
+  SalesHistoryViewModel(this._prefs);
 
   String? _selectedDate;
   String? get selectedDate => _selectedDate;
@@ -46,8 +49,7 @@ class SalesHistoryViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final String? encodedData = prefs.getString('sales_history');
+      final String? encodedData = _prefs.getString('sales_history');
 
       if (encodedData != null) {
         _history = jsonDecode(encodedData);
@@ -96,8 +98,7 @@ class SalesHistoryViewModel extends ChangeNotifier {
   /// 전체 내역 초기화
   Future<void> clearAllHistory() async {
     _history.clear();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('sales_history');
+    await _prefs.remove('sales_history');
     notifyListeners();
   }
 
@@ -108,8 +109,7 @@ class SalesHistoryViewModel extends ChangeNotifier {
       return itemDate == dateString;
     });
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sales_history', jsonEncode(_history));
+    await _prefs.setString('sales_history', jsonEncode(_history));
 
     selectLatestDate();
     notifyListeners();
@@ -117,7 +117,6 @@ class SalesHistoryViewModel extends ChangeNotifier {
 
   Future<void> updateCancelStatus(int salesNumber, bool isCanceled) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
       final index = _history.indexWhere((item) => item['salesNumber'] == salesNumber);
 
       if (index != -1) {
@@ -127,7 +126,7 @@ class SalesHistoryViewModel extends ChangeNotifier {
         _history[index] = updatedRecord;
 
         String jsonString = jsonEncode(_history);
-        await prefs.setString('sales_history', jsonString);
+        await _prefs.setString('sales_history', jsonString);
 
         notifyListeners();
       }
