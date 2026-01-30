@@ -86,6 +86,12 @@ flutter:
   assets:
     - assets/image/
     - assets/icon/app_icon.png
+
+  fonts:
+    - family: NanumSquareRoundFont
+      fonts:
+        - asset: assets/fonts/NanumSquareRoundB.ttf
+        - asset: assets/fonts/NanumSquareRoundEB.ttf
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

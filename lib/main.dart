@@ -1,4 +1,5 @@
 import 'package:firebase_app_check/firebase_app_check.dart' show FirebaseAppCheck, AndroidProvider;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:project/viewmodels/admin_auth_view_model.dart';
@@ -14,6 +15,17 @@ import 'viewmodels/product_view_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  LicenseRegistry.addLicense(() async* {
+    yield const LicenseEntryWithLineBreaks(['NanumSquareRoundFont'], // 폰트 패밀리 이름
+      '''
+Copyright (c) 2010, NAVER Corporation (https://www.navercorp.com/) with Reserved Font Name Nanum, Naver Nanum, NanumGothic, Naver NanumGothic, NanumMyeongjo, Naver NanumMyeongjo, NanumBrush, Naver NanumBrush, NanumPen, Naver NanumPen, Naver NanumGothicEco, NanumGothicEco, Naver NanumMyeongjoEco, NanumMyeongjoEco, Naver NanumGothicLight, NanumGothicLight, NanumBarunGothic, Naver NanumBarunGothic, NanumSquareRound, NanumBarunPen, MaruBuri, NanumSquareNeo
+
+​
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+      ''',
+    );
+  });
   await Firebase.initializeApp();
 
   // App Check 설정
@@ -43,9 +55,12 @@ void main() async {
         ChangeNotifierProvider<SalesHistoryViewModel>.value(value: salesVM),
         ChangeNotifierProvider(create: (_) => AdminAuthViewModel(initialPw)),
       ],
-      child: const MaterialApp(
+      child: MaterialApp(
+        theme: ThemeData(
+          fontFamily: "NanumSquareRoundFont",
+        ),
         debugShowCheckedModeBanner: false,
-        home: MainScreen(),
+        home: const MainScreen(),
       ),
     ),
   );
