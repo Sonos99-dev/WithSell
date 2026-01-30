@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:project/viewmodels/admin_view_model.dart';
 import 'package:project/viewmodels/sales_history_view_model.dart';
 import 'package:project/views/admin_page.dart';
 import 'package:project/views/app_color.dart';
@@ -17,13 +16,6 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AdminViewModel>().loadFromLocal();
-    });
-  }
   // 4개의 메뉴 리스트
   final List<Widget> _pages = [
     const ProductPage(), // 1번: 기존 상품 페이지

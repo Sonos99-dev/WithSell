@@ -23,12 +23,6 @@ class _AdminPageState extends State<AdminPage> {
   ProductCategory _selectedCategory = ProductCategory.all;
 
   @override
-  void initState() {
-    super.initState();
-    Future.microtask(() => context.read<AdminViewModel>().loadFromLocal());
-  }
-
-  @override
   Widget build(BuildContext context) {
     if (!_isAuthenticated) {
       return AdminAuthView(

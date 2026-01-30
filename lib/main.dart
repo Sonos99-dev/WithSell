@@ -6,6 +6,7 @@ import 'package:project/viewmodels/admin_view_model.dart';
 import 'package:project/viewmodels/sales_history_view_model.dart';
 import 'package:project/views/main_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'repositories/product_repository.dart';
 import 'services/firestore_service.dart';
@@ -28,10 +29,11 @@ void main() async {
   final adminVM = AdminViewModel(productRepo);
   final productVM = ProductViewModel();
   final salesVM = SalesHistoryViewModel();
+  final prefs = await SharedPreferences.getInstance();
 
-  // 3. 앱 실행 전 로컬 데이터 로드 및 연동 (핵심)
-  await adminVM.loadFromLocal();
-  productVM.setProducts(adminVM.products); // 여기서 데이터가 복사됨
+  await adminVM.loadFromLocal(prefs);
+  productVM.setProducts(adminVM.products);
+  final initialPw = prefs.getString("admin_password") ?? "0000";
 
   runApp(
     MultiProvider(
@@ -39,7 +41,7 @@ void main() async {
         ChangeNotifierProvider<ProductViewModel>.value(value: productVM),
         ChangeNotifierProvider<AdminViewModel>.value(value: adminVM),
         ChangeNotifierProvider<SalesHistoryViewModel>.value(value: salesVM),
-        ChangeNotifierProvider(create: (_) => AdminAuthViewModel()),
+        ChangeNotifierProvider(create: (_) => AdminAuthViewModel(initialPw)),
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,

@@ -40,9 +40,7 @@ class AdminViewModel extends ChangeNotifier {
     }
   }
 
-  // 로컬 로드 (void로 변경)
-  Future<void> loadFromLocal() async {
-    final prefs = await SharedPreferences.getInstance();
+  Future<void> loadFromLocal(SharedPreferences prefs) async {
     final String? encoded = prefs.getString('cached_products');
 
     if (encoded != null) {

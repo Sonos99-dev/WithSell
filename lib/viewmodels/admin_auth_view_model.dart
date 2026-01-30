@@ -4,17 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AdminAuthViewModel extends ChangeNotifier {
   static const String _pwKey = "admin_password";
-  String _currentPassword = "0000"; // 초기값
+  String _currentPassword;
 
-  AdminAuthViewModel() {
-    _loadPassword();
-  }
-
-  Future<void> _loadPassword() async {
-    final prefs = await SharedPreferences.getInstance();
-    _currentPassword = prefs.getString(_pwKey) ?? "0000";
-    notifyListeners();
-  }
+  AdminAuthViewModel(this._currentPassword);
+  String get currentPassword => _currentPassword;
 
   bool checkPassword(String input) {
     return _currentPassword == input.trim();
