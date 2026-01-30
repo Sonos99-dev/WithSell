@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project/viewmodels/admin_auth_view_model.dart';
 import 'package:project/views/sales_history_base_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -349,9 +350,12 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
           subTextColor: Colors.red[300]!,
           isDangerDialog: true,
           onConfirm: () async {
-            await vm.deleteHistory(salesNumber);
-            if (context.mounted) Navigator.pop(context);
-          }
+            _confirmAdminPassword(context, () async {
+              await vm.deleteHistory(salesNumber);
+              if (context.mounted) Navigator.pop(context);
+            }
+          );
+        }
       )
     );
   }
@@ -371,8 +375,11 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
           subTextColor: Colors.red[300]!,
           isDangerDialog: true,
           onConfirm: () async {
-            await vm.deleteHistoryByDate(date);
-            if (context.mounted) Navigator.pop(context);
+            _confirmAdminPassword(context, () async {
+              await vm.deleteHistoryByDate(date);
+              if (context.mounted) Navigator.pop(context);
+            }
+          );
         }
       )
     );
@@ -425,6 +432,57 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
             );
           }
       )
+    );
+  }
+
+  void _confirmAdminPassword(BuildContext context, Function onSuccess) {
+    final TextEditingController pwController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => SalesHistoryBaseDialog(
+        title: "관리자 인증",
+        content: "삭제 권한 확인을 위해 비밀번호를 입력해주세요.",
+        icon: Icons.lock_outline,
+        iconColor: Colors.orange,
+        customContent: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 15),
+            TextField(
+              controller: pwController,
+              obscureText: true,
+              maxLength: 4,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                hintText: "비밀번호 4자리",
+                filled: true,
+                fillColor: Colors.grey[100],
+                counterText: "",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ],
+        ),
+        onConfirm: () {
+          final authVm = context.read<AdminAuthViewModel>();
+          if (authVm.checkPassword(pwController.text)) {
+            Navigator.pop(context);
+            onSuccess();
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("비밀번호가 일치하지 않습니다."),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 }

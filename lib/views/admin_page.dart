@@ -354,7 +354,7 @@ class _AdminPageState extends State<AdminPage> {
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("두 입력칸 모두 비밀번호를 동일하게 입력해주세요")),
+                const SnackBar(content: Text("두 입력칸 모두 비밀번호를 동일하게 입력해주세요"), backgroundColor: Colors.redAccent,),
               );
             }
           }
