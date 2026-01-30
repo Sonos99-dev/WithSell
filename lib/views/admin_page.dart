@@ -365,13 +365,21 @@ class _AdminPageState extends State<AdminPage> {
         ),
         onConfirm: () async {
           final authVm = context.read<AdminAuthViewModel>();
-          if (newController.text.trim().isEmpty || confirmPwController.text.trim().isEmpty) {
+          String newPw = newController.text.trim();
+          String confirmPw = confirmPwController.text.trim();
+          if (newPw.isEmpty || confirmPw.isEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("사용할 비밀번호를 입력해주세요.")),
             );
             return;
           }
-          bool success = await authVm.updatePassword(newController.text, confirmPwController.text);
+          if (newPw.length != 4) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("비밀번호는 반드시 4자리여야 합니다."), backgroundColor: Colors.redAccent),
+            );
+            return;
+          }
+          bool success = await authVm.updatePassword(newPw, confirmPw);
           if (context.mounted) {
             if (success) {
               Navigator.pop(context);
