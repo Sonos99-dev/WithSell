@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:project/models/productCategory.dart';
-import 'package:project/models/product_model.dart'; // 모델 임포트 추가
+import 'package:project/models/product_category.dart';
+import 'package:project/models/product_model.dart';
 import 'package:project/viewmodels/admin_view_model.dart';
 import 'package:project/views/app_color.dart';
 import 'package:provider/provider.dart';
 
 class AddProductPage extends StatefulWidget {
-  final ProductModel? product; // 수정 시 데이터를 받기 위한 변수 추가
+  final ProductModel? product;
 
   const AddProductPage({super.key, this.product});
 
@@ -18,171 +17,67 @@ class AddProductPage extends StatefulWidget {
 class _AddProductPageState extends State<AddProductPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // 수정 여부 판단 변수
   bool get isEditing => widget.product != null;
 
   late TextEditingController _nameController;
   late TextEditingController _priceController;
-  late TextEditingController _colorController;
   late TextEditingController _discountPriceController;
   late TextEditingController _discountQuantityController;
   late TextEditingController _imgUrlController;
   late ProductCategory _selectedCategory;
-  Color _selectedColor = Colors.red;
   bool _isDiscountEnabled = false;
-
 
   @override
   void initState() {
     super.initState();
-
-    // 1. 컨트롤러 및 초기값 설정 (수정 모드일 경우 기존 데이터 채우기)
     _nameController = TextEditingController(text: widget.product?.name ?? "");
     _priceController = TextEditingController(text: widget.product?.price.toString() ?? "");
-    _colorController = TextEditingController(text: widget.product?.borderColor ?? "#000000");
     _discountPriceController = TextEditingController(text: isEditing ? widget.product?.discountPrice.toString() : "");
     _discountQuantityController = TextEditingController(text: isEditing ? widget.product?.discountQuantity.toString() : "");
     _imgUrlController = TextEditingController(text: widget.product?.imgUrl ?? "");
     _selectedCategory = widget.product?.category ?? ProductCategory.etc;
 
-    // 2. 초기 색상 및 할인 체크박스 상태 설정
     if (isEditing) {
-      _selectedColor = _hexToColor(widget.product!.borderColor);
-      // 할인가가 0보다 크면 체크박스 활성화로 간주
       _isDiscountEnabled = widget.product!.discountQuantity > 0;
     }
   }
 
-  // 헥사코드를 Color 객체로 변환
-  Color _hexToColor(String hex) {
-    try {
-      return Color(int.parse(hex.replaceFirst('#', 'FF'), radix: 16));
-    } catch (e) {
-      return Colors.red;
-    }
-  }
-
-  void _pickColor() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('테두리 색상 선택'),
-        content: SingleChildScrollView(
-          child: ColorPicker(
-            pickerColor: _selectedColor,
-            onColorChanged: (color) {
-              setState(() => _selectedColor = color);
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              String hexCode = '#${_selectedColor.value.toRadixString(16).substring(2).toUpperCase()}';
-              _colorController.text = hexCode;
-              Navigator.pop(context);
-            },
-            child: const Text('확인'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-
-
     return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA), // 밝은 회색 배경
       appBar: AppBar(
-        // 제목 동적 변경
         title: Text(isEditing ? "상품 정보 수정" : "새 상품 등록",
-            style: const TextStyle(color: Colors.white)),
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: AppColors.mainColor,
+        elevation: 0,
+        centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTextField(_nameController, "상품명", Icons.shopping_bag),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 15),
-                child: DropdownButtonFormField<ProductCategory>(
-                  value: _selectedCategory,
-                  decoration: const InputDecoration(labelText: "카테고리 설정", prefixIcon: Icon(Icons.category)),
-                  items: ProductCategory.values.where((e) => e != ProductCategory.all).map((cat) {
-                    return DropdownMenuItem(value: cat, child: Text(cat.label));
-                  }).toList(),
-                  onChanged: (val) => setState(() => _selectedCategory = val!),
-                ),
-              ),
-              _buildTextField(_priceController, "기본 가격", Icons.attach_money, isNumber: true),
-              _buildTextField(_imgUrlController, "이미지 URL (Firebase Storage 등)", Icons.image),
+              _buildSectionTitle("상품 정보"),
+              _buildInputCard([
+                _buildTextField(_nameController, "상품명", Icons.shopping_bag_outlined),
+                const SizedBox(height: 16),
+                _buildCategoryDropdown(),
+                const SizedBox(height: 16),
+                _buildTextField(_priceController, "판매 가격 (원)", Icons.payments_outlined, isNumber: true),
+                const SizedBox(height: 16),
+                _buildTextField(_imgUrlController, "이미지 URL", Icons.image_outlined),
+              ]),
 
-              GestureDetector(
-                onTap: _pickColor,
-                child: AbsorbPointer(
-                  child: _buildTextField(
-                    _colorController,
-                    "테두리 색상 (클릭하여 선택)",
-                    Icons.color_lens,
-                    suffixIcon: Container(
-                      margin: const EdgeInsets.all(10),
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: _selectedColor,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.grey),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              const SizedBox(height: 24),
+              _buildDiscountSection(),
 
-              const Divider(height: 30),
-
-              Row(
-                children: [
-                  Checkbox(
-                    value: _isDiscountEnabled,
-                    activeColor: AppColors.mainColor,
-                    onChanged: (value) {
-                      setState(() {
-                        _isDiscountEnabled = value ?? false;
-                        if (!_isDiscountEnabled) {
-                          _discountPriceController.clear();
-                          _discountQuantityController.clear();
-                        }
-                      });
-                    },
-                  ),
-                  const Text("할인 혜택 적용하기", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                ],
-              ),
-
-              if (_isDiscountEnabled) ...[
-                const SizedBox(height: 10),
-                _buildTextField(_discountQuantityController, "할인 적용 개수 (예: 3)", Icons.onetwothree, isNumber: true),
-                _buildTextField(_discountPriceController, "갯수 충족시 할인 금액 (예: 1000)", Icons.discount, isNumber: true),
-              ],
-
-              const SizedBox(height: 30),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.mainColor),
-                  onPressed: _submitForm,
-                  // 버튼 텍스트 동적 변경
-                  child: Text(isEditing ? "수정 완료하기" : "상품 등록하기",
-                      style: const TextStyle(color: Colors.white, fontSize: 18)),
-                ),
-              ),
+              const SizedBox(height: 40),
+              _buildSubmitButton(),
+              const SizedBox(height: 50),
             ],
           ),
         ),
@@ -190,25 +85,173 @@ class _AddProductPageState extends State<AddProductPage> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, IconData icon, {bool isNumber = false, Widget? suffixIcon}) {
+
+  Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.only(left: 4, bottom: 12),
+      child: Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87)),
+    );
+  }
+
+  // 흰색 카드 배경
+  Widget _buildInputCard(List<Widget> children) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 5)),
+        ],
+      ),
+      child: Column(children: children),
+    );
+  }
+
+  Widget _buildCategoryDropdown() {
+    return DropdownButtonFormField<ProductCategory>(
+      value: _selectedCategory,
+      decoration: _inputDecoration("카테고리", Icons.category_outlined),
+      items: ProductCategory.values.where((e) => e != ProductCategory.all).map((cat) {
+        return DropdownMenuItem(value: cat, child: Text(cat.label));
+      }).toList(),
+      onChanged: (val) => setState(() => _selectedCategory = val!),
+    );
+  }
+
+  Widget _buildDiscountSection() {
+    return Container(
+      decoration: BoxDecoration(
+        color: _isDiscountEnabled ? Colors.orangeAccent.withOpacity(0.15) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          width: 2,
+          color: _isDiscountEnabled ? Colors.orangeAccent : Colors.transparent,
+        ),
+      ),
+      child: Column(
+        children: [
+          SwitchListTile(
+            title: Text("다량 구매 할인 적용",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: _isDiscountEnabled ? AppColors.mainColor : Colors.black)),
+            subtitle: Text(_isDiscountEnabled ? "할인 혜택이 활성화되었습니다." : "할인 혜택을 설정하려면 켜주세요.", style: TextStyle(fontSize: 16),),
+            value: _isDiscountEnabled,
+            activeColor: AppColors.mainColor,
+            onChanged: (val) => setState(() => _isDiscountEnabled = val),
+          ),
+          if (_isDiscountEnabled)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 25),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                ),
+                child: Wrap( // 텍스트와 필드를 자연스럽게 연결
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 12,
+                  children: [
+                    _buildInlineField(_discountQuantityController, "0", 60),
+                    const Text("개 구매 시",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                    _buildInlineField(_discountPriceController, "0", 120),
+                    const Text("원 할인하기",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // 문장 안에 들어갈 작은 텍스트 필드 빌더
+  Widget _buildInlineField(TextEditingController controller, String hint, double width) {
+    return SizedBox(
+      width: width,
       child: TextFormField(
         controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: Icon(icon),
-          suffixIcon: suffixIcon,
-          border: const OutlineInputBorder(),
+        keyboardType: TextInputType.number,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppColors.mainColor
         ),
-        keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+        decoration: InputDecoration(
+          hintText: hint,
+          contentPadding: const EdgeInsets.symmetric(vertical: 8),
+          filled: true,
+          fillColor: Colors.grey[100],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: AppColors.mainColor.withOpacity(0.3)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: AppColors.mainColor, width: 2),
+          ),
+        ),
         validator: (value) {
-          if (!_isDiscountEnabled && (controller == _discountPriceController || controller == _discountQuantityController)) {
-            return null;
-          }
-          if (value == null || value.isEmpty) return "필수 입력 항목입니다.";
+          if (_isDiscountEnabled && (value == null || value.isEmpty)) return "";
           return null;
         },
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label, IconData icon, {bool isNumber = false, Widget? suffixIcon}) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      decoration: _inputDecoration(label, icon).copyWith(suffixIcon: suffixIcon),
+      validator: (value) {
+        if (!_isDiscountEnabled && (controller == _discountPriceController || controller == _discountQuantityController)) return null;
+        if (value == null || value.isEmpty) return "필수 입력";
+        return null;
+      },
+    );
+  }
+
+  InputDecoration _inputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, size: 30),
+      filled: true,
+      fillColor: const Color(0xFFF1F3F5),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+      floatingLabelStyle: const TextStyle(color: AppColors.mainColor, fontWeight: FontWeight.bold, fontSize: 22),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return Container(
+      width: double.infinity,
+      height: 65,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(color: AppColors.mainColor.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6)),
+        ],
+      ),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.mainColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          elevation: 0,
+        ),
+        onPressed: _submitForm,
+        child: Text(isEditing ? "수정 완료" : "상품 등록",
+            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -216,33 +259,23 @@ class _AddProductPageState extends State<AddProductPage> {
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       final adminVm = context.read<AdminViewModel>();
-
-      int dPrice = 0;
-      int dQty = 0;
-
-      if (_isDiscountEnabled) {
-        dPrice = int.tryParse(_discountPriceController.text) ?? 0;
-        dQty = int.tryParse(_discountQuantityController.text) ?? 0;
-      }
+      int dPrice = _isDiscountEnabled ? (int.tryParse(_discountPriceController.text) ?? 0) : 0;
+      int dQty = _isDiscountEnabled ? (int.tryParse(_discountQuantityController.text) ?? 0) : 0;
 
       if (isEditing) {
-        // [수정 모드]: updateProduct 호출
         await adminVm.updateProduct(
           productNumber: widget.product!.productNumber,
           name: _nameController.text,
           price: int.parse(_priceController.text),
-          borderColor: _colorController.text,
           discountPrice: dPrice,
           discountQuantity: dQty,
           imgUrl: _imgUrlController.text,
           category: _selectedCategory,
         );
       } else {
-        // [등록 모드]: addProduct 호출
         await adminVm.addProduct(
           name: _nameController.text,
           price: int.parse(_priceController.text),
-          borderColor: _colorController.text,
           discountPrice: dPrice,
           discountQuantity: dQty,
           imgUrl: _imgUrlController.text,
@@ -253,19 +286,9 @@ class _AddProductPageState extends State<AddProductPage> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(isEditing ? "상품이 수정되었습니다." : "상품이 성공적으로 등록되었습니다."))
+            SnackBar(content: Text(isEditing ? "상품이 수정되었습니다." : "상품이 성공적으로 등록되었습니다."), behavior: SnackBarBehavior.floating,)
         );
       }
     }
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _priceController.dispose();
-    _colorController.dispose();
-    _discountPriceController.dispose();
-    _discountQuantityController.dispose();
-    super.dispose();
   }
 }
