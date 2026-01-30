@@ -544,7 +544,7 @@ class _ProductPageState extends State<ProductPage> {
                                     onTap: () {
                                       _showCashInputPad(context, (totalAmount) {
                                         setDialogState(() {
-                                          cashController.text = AppFormat.won(totalAmount).toString();
+                                          cashController.text = totalAmount.toString();
                                         });
                                       });
                                     },
