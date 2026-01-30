@@ -33,7 +33,7 @@ class _MainScreenState extends State<MainScreen> {
     if (index == 1) {
       context.read<SalesHistoryViewModel>().selectLatestDate();
     }
-    if (index == 2) { // 🔥 정산 탭 클릭 시 초기화
+    if (index == 2) {
       final salesVm = context.read<SalesHistoryViewModel>();
       final settlementVm = context.read<SettlementViewModel>();
 
@@ -118,7 +118,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.calculate_rounded),
-                label: '정산',
+                label: '정산 기록',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.manage_accounts),

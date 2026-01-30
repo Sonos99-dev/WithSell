@@ -139,7 +139,7 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: const Text("정산 리포트",
+        title: const Text("정산 기록",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20)),
         backgroundColor: AppColors.mainColor,
         centerTitle: true,
@@ -209,7 +209,7 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
     if (selectedDate != null) {
       try {
         DateTime parsedDate = DateTime.parse(selectedDate);
-        dateDisplay = DateFormat('M월 d일').format(parsedDate);
+        dateDisplay = DateFormat('yy년 M월 d일').format(parsedDate);
       } catch (e) {
         dateDisplay = selectedDate; // 파싱 실패 시 원본 유지
       }
@@ -224,10 +224,13 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 5, bottom: 5),
+            padding: const EdgeInsets.only(top: 5),
             child: Text("일일 판매 금액: ${total}원",
                 style: const TextStyle(color: Colors.white, fontSize: 34, fontWeight: FontWeight.w900)),
           ),
+          Text("$dateDisplay 기록",
+              style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 16, fontWeight: FontWeight.w700)),
+          SizedBox(height: 10,),
           SizeTransition(
             sizeFactor: _expandAnimation,
             axisAlignment: -1.0,
@@ -302,7 +305,7 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
   Widget _buildChartSection(String title, Widget chart, Widget legend, {required bool hasData}) {
     return Column(
       children: [
-        Text(title, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13, fontWeight: FontWeight.bold)),
+        Text(title, style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 15, fontWeight: FontWeight.w900)),
         const SizedBox(height: 10),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 20),
@@ -398,7 +401,6 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
             style: const TextStyle(
               color: Colors.white,
               fontSize: 11,
-              fontWeight: FontWeight.bold
             ),
             overflow: TextOverflow.ellipsis,
             maxLines: 2,
@@ -500,7 +502,7 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
             dense: true,
             leading: Icon(isMe ? Icons.stars : Icons.tablet_android, color: isMe ? Colors.orange : Colors.grey, size: 18),
             title: Text(isMe ? "내 기기 (현재) (${dev.uuid.substring(0, 8)})" : "기기$index, (${dev.uuid.substring(0, 8)})",
-                style: TextStyle(fontWeight: isMe ? FontWeight.w900 : FontWeight.bold, fontSize: 13)),
+                style: TextStyle(fontWeight: isMe ? FontWeight.w900 : FontWeight.w900, fontSize: 13)),
             trailing: Text("${daily?.totalAmount ?? 0}원",
                 style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
           );
@@ -524,7 +526,7 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
           children: [
             Icon(icon, color: Colors.white, size: 14),
             const SizedBox(width: 8),
-            const Text("데이터 없음", style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold)),
+            const Text("데이터 없음", style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w900)),
           ],
         ),
       );
@@ -546,7 +548,7 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
           dropdownColor: AppColors.mainColor,
           icon: Icon(icon, color: Colors.white, size: 14),
           isExpanded: true,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13),
           items: items.map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
           onChanged: onChanged,
         ),
@@ -567,7 +569,7 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
           dropdownColor: AppColors.mainColor,
           icon: const Icon(Icons.tablet_android, color: Colors.white, size: 14),
           isExpanded: true,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13),
           items: [
             const DropdownMenuItem(value: "all", child: Text("전체 통합")),
             DropdownMenuItem(value: vm.myUuid, child: Text("현재 기기")),
