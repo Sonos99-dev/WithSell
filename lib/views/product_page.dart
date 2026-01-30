@@ -2,34 +2,145 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:project/models/productCategory.dart';
 import 'package:project/viewmodels/product_view_model.dart';
 import 'package:project/viewmodels/sales_history_view_model.dart';
 import 'package:project/views/app_color.dart';
 import 'package:provider/provider.dart';
 
-class ProductPage extends StatelessWidget {
+class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
 
-  Color _hexToColor(String hexCode) {
-    try {
-      hexCode = hexCode.replaceAll('#', '');
-      if (hexCode.length == 6) {
-        hexCode = 'FF' + hexCode;
-      }
-      return Color(int.parse('0x$hexCode'));
-    } catch (e) {
-      return Colors.grey;
-    }
-  }
-
   @override
+  State<ProductPage> createState() => _ProductPageState();
+}
+
+class _ProductPageState extends State<ProductPage> {
+  ProductCategory _selectedCategory = ProductCategory.all;
+
   Widget build(BuildContext context) {
     final vm = context.watch<ProductViewModel>();
-    final products = vm.products;
+    final filteredProducts = _selectedCategory == ProductCategory.all
+        ? vm.products
+        : vm.products.where((p) => p.category == _selectedCategory).toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F7),
-      body: products.isEmpty
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
+        child: Container(
+          padding: const EdgeInsets.only(top: 40, bottom: 10),
+          decoration: BoxDecoration(
+            color: AppColors.mainColor,
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Row(
+                    children: ProductCategory.values.map((category) {
+                      final isSelected = _selectedCategory == category;
+
+                      int categoryCartCount = 0;
+                      if (category == ProductCategory.all) {
+                        categoryCartCount = vm.products.fold(0, (sum, p) => sum + vm.getQuantity(p.productNumber));
+                      } else {
+                        categoryCartCount = vm.products
+                            .where((p) => p.category == category)
+                            .fold(0, (sum, p) => sum + vm.getQuantity(p.productNumber));
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: ChoiceChip(
+                          showCheckmark: false,
+                          label: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                             Text(category.label),
+                              if (categoryCartCount > 0) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? AppColors.mainColor : Colors.redAccent,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    '$categoryCartCount',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                          ]),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() => _selectedCategory = category);
+                          },
+                          selectedColor: Colors.white,
+                          backgroundColor: AppColors.mainColor.withOpacity(0.8),
+                          shape: StadiumBorder(side: BorderSide(color: Colors.white.withOpacity(0.5))),
+                          labelStyle: TextStyle(
+                            color: isSelected ? AppColors.mainColor : Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                          ),
+                          padding: (categoryCartCount > 0) ?  const EdgeInsets.fromLTRB(16, 10, 7, 10) : EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 15, left: 5),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      vm.clearQuantities();
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    splashColor: Colors.white.withOpacity(0.3),
+                    highlightColor: Colors.white.withOpacity(0.1),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.refresh_rounded,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                          const Text(
+                            "선택 초기화",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      body: filteredProducts.isEmpty
           ? const Center(child: Text("등록된 상품이 없습니다.", style: TextStyle(fontSize: 20)))
           : GridView.builder(
         padding: const EdgeInsets.fromLTRB(12, 20, 12, 110),
@@ -39,18 +150,22 @@ class ProductPage extends StatelessWidget {
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
         ),
-        itemCount: products.length,
+        itemCount: filteredProducts.length,
         itemBuilder: (_, index) {
-          final p = products[index];
+          final p = filteredProducts[index];
           final quantity = vm.getQuantity(p.productNumber);
           final totalPrice = vm.getTotalPriceWithDiscount(p.productNumber);
           final discountAmount = vm.getDiscountAmount(p.productNumber);
-          final Color themeColor = _hexToColor(p.borderColor);
 
-          return Container(
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: quantity > 0 ? AppColors.mainColor : Colors.transparent,
+                width: 3,
+              ),
               boxShadow: [
                 BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 3))
               ],
@@ -82,13 +197,13 @@ class ProductPage extends StatelessWidget {
                 Expanded(
                   flex: 6,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                    padding: const EdgeInsets.fromLTRB(15, 12, 15, 12),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           p.name,
-                          style: const TextStyle(fontSize: 27, fontWeight: FontWeight.w900, color: Colors.black, height: 1.1),
+                          style: TextStyle(fontSize: 27, fontWeight: FontWeight.w900, color: quantity > 0 ? AppColors.mainColor : Colors.black, height: 1.1),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -97,9 +212,7 @@ class ProductPage extends StatelessWidget {
                           "${p.price}원",
                           style: TextStyle(fontSize: 25, color: Colors.grey[700], fontWeight: FontWeight.w600),
                         ),
-
                         const Spacer(),
-
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -123,31 +236,42 @@ class ProductPage extends StatelessWidget {
                                 ],
                               ),
                             ),
-
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                if (discountAmount > 0)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFFFEFF0),
-                                      borderRadius: BorderRadius.circular(999),
-                                    ),
-                                    child: Text(
-                                      "할인 -$discountAmount원",
-                                      style: const TextStyle(
-                                        color: Color(0xFFE5484D),
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 16,
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (discountAmount > 0)
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFFFEFF0),
+                                          borderRadius: BorderRadius.circular(999),
+                                        ),
+                                        child: Text(
+                                          "할인 -$discountAmount원",
+                                          style: const TextStyle(
+                                            color: Color(0xFFE5484D),
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 16,
+                                          ),
+                                        ),
                                       ),
                                     ),
+                                  const SizedBox(height: 2),
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      "$totalPrice원",
+                                      style: const TextStyle(fontSize: 37, fontWeight: FontWeight.w900, color: Colors.black),
+                                    ),
                                   ),
-                                Text(
-                                  "$totalPrice원",
-                                  style: const TextStyle(fontSize: 37, fontWeight: FontWeight.w900, color: Colors.black),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -161,7 +285,7 @@ class ProductPage extends StatelessWidget {
         },
       ),
       floatingActionButton: Visibility(
-        visible: products.isNotEmpty && vm.getTotalCartPrice() != 0,
+        visible: filteredProducts.isNotEmpty && vm.getTotalCartPrice() != 0,
         child: Container(
           width: MediaQuery.of(context).size.width * 0.95,
           height: 80,

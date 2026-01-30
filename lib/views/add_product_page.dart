@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:project/models/productCategory.dart';
 import 'package:project/models/product_model.dart'; // 모델 임포트 추가
 import 'package:project/viewmodels/admin_view_model.dart';
 import 'package:project/views/app_color.dart';
@@ -26,9 +27,10 @@ class _AddProductPageState extends State<AddProductPage> {
   late TextEditingController _discountPriceController;
   late TextEditingController _discountQuantityController;
   late TextEditingController _imgUrlController;
-
+  late ProductCategory _selectedCategory;
   Color _selectedColor = Colors.red;
   bool _isDiscountEnabled = false;
+
 
   @override
   void initState() {
@@ -41,6 +43,7 @@ class _AddProductPageState extends State<AddProductPage> {
     _discountPriceController = TextEditingController(text: isEditing ? widget.product?.discountPrice.toString() : "");
     _discountQuantityController = TextEditingController(text: isEditing ? widget.product?.discountQuantity.toString() : "");
     _imgUrlController = TextEditingController(text: widget.product?.imgUrl ?? "");
+    _selectedCategory = widget.product?.category ?? ProductCategory.etc;
 
     // 2. 초기 색상 및 할인 체크박스 상태 설정
     if (isEditing) {
@@ -88,6 +91,8 @@ class _AddProductPageState extends State<AddProductPage> {
 
   @override
   Widget build(BuildContext context) {
+
+
     return Scaffold(
       appBar: AppBar(
         // 제목 동적 변경
@@ -104,6 +109,17 @@ class _AddProductPageState extends State<AddProductPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTextField(_nameController, "상품명", Icons.shopping_bag),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15),
+                child: DropdownButtonFormField<ProductCategory>(
+                  value: _selectedCategory,
+                  decoration: const InputDecoration(labelText: "카테고리 설정", prefixIcon: Icon(Icons.category)),
+                  items: ProductCategory.values.where((e) => e != ProductCategory.all).map((cat) {
+                    return DropdownMenuItem(value: cat, child: Text(cat.label));
+                  }).toList(),
+                  onChanged: (val) => setState(() => _selectedCategory = val!),
+                ),
+              ),
               _buildTextField(_priceController, "기본 가격", Icons.attach_money, isNumber: true),
               _buildTextField(_imgUrlController, "이미지 URL (Firebase Storage 등)", Icons.image),
 
@@ -219,6 +235,7 @@ class _AddProductPageState extends State<AddProductPage> {
           discountPrice: dPrice,
           discountQuantity: dQty,
           imgUrl: _imgUrlController.text,
+          category: _selectedCategory,
         );
       } else {
         // [등록 모드]: addProduct 호출
@@ -229,6 +246,7 @@ class _AddProductPageState extends State<AddProductPage> {
           discountPrice: dPrice,
           discountQuantity: dQty,
           imgUrl: _imgUrlController.text,
+          category: _selectedCategory,
         );
       }
 

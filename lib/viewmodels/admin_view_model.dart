@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
+import 'package:project/models/productCategory.dart';
 import 'package:project/models/product_model.dart';
 import 'package:project/repositories/product_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -58,7 +59,8 @@ class AdminViewModel extends ChangeNotifier {
     required String borderColor,
     required int discountPrice,
     required int discountQuantity,
-    required String imgUrl
+    required String imgUrl,
+    required ProductCategory category
   }) async {
     _setLoading(true);
     try {
@@ -74,6 +76,7 @@ class AdminViewModel extends ChangeNotifier {
         discountPrice: discountPrice,
         discountQuantity: discountQuantity,
         imgUrl: imgUrl,
+        category: category,
       );
 
       await _repo.postProduct(newProduct);
@@ -103,6 +106,7 @@ class AdminViewModel extends ChangeNotifier {
     required int discountPrice,
     required int discountQuantity,
     required String imgUrl,
+    required ProductCategory category,
   }) async {
     _setLoading(true);
     try {
@@ -114,10 +118,10 @@ class AdminViewModel extends ChangeNotifier {
         discountPrice: discountPrice,
         discountQuantity: discountQuantity,
         imgUrl: imgUrl,
+        category: category,
       );
-
       await _repo.postProduct(updatedProduct);
-      await syncAndSave(); // 로컬 및 UI 동기화
+      await syncAndSave();
     } finally {
       _setLoading(false);
     }

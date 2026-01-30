@@ -1,3 +1,5 @@
+import 'package:project/models/productCategory.dart' show ProductCategory;
+
 class ProductModel {
   final int discountPrice;
   final int discountQuantity;
@@ -6,6 +8,7 @@ class ProductModel {
   final int productNumber;
   final String borderColor;
   final String imgUrl;
+  final ProductCategory category;
 
   const ProductModel({
     required this.discountPrice,
@@ -15,6 +18,7 @@ class ProductModel {
     required this.productNumber,
     required this.borderColor,
     required this.imgUrl,
+    required this.category,
   });
 
   //
@@ -27,6 +31,10 @@ class ProductModel {
       productNumber: data['productNumber'] ?? 0,
       borderColor: data['borderColor'] ?? '',
       imgUrl: data['imgUrl'] ?? '',
+      category: ProductCategory.values.firstWhere(
+            (e) => e.name == (data['category'] ?? 'etc'),
+        orElse: () => ProductCategory.etc,
+      ),
     );
   }
 
@@ -40,6 +48,10 @@ class ProductModel {
       productNumber: json['productNumber'] ?? 0,
       borderColor: json['borderColor'] ?? '',
       imgUrl: json['imgUrl'] ?? '',
+      category: ProductCategory.values.firstWhere(
+            (e) => e.name == (json['category'] ?? 'etc'),
+        orElse: () => ProductCategory.etc,
+      ),
     );
   }
 
@@ -53,6 +65,7 @@ class ProductModel {
       "productNumber": productNumber,
       "borderColor": borderColor,
       "imgUrl": imgUrl,
+      "category": category.name,
     };
   }
 
@@ -66,7 +79,8 @@ class ProductModel {
     int? price,
     int? productNumber,
     String? borderColor,
-    String? imgUrl
+    String? imgUrl,
+    ProductCategory? category,
   }) {
     return ProductModel(
       discountPrice: discountPrice ?? this.discountPrice,
@@ -75,7 +89,8 @@ class ProductModel {
       price: price ?? this.price,
       productNumber: productNumber ?? this.productNumber,
       borderColor: borderColor ?? this.borderColor,
-      imgUrl: imgUrl ?? this.imgUrl
+      imgUrl: imgUrl ?? this.imgUrl,
+      category: category ?? this.category
     );
   }
 }
