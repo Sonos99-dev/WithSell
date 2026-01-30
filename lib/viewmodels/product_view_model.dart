@@ -17,7 +17,14 @@ class ProductViewModel extends ChangeNotifier {
   }
 
   void setQuantity(int productNumber, int quantity) {
-    _quantities[productNumber] = quantity;
+    int validatedQuantity = quantity;
+
+    if (quantity > 99) {
+      validatedQuantity = 99;
+    } else if (quantity < 0) {
+      validatedQuantity = 0;
+    }
+    _quantities[productNumber] = validatedQuantity;
     notifyListeners();
   }
 
