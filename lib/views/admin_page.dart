@@ -58,12 +58,38 @@ class _AdminPageState extends State<AdminPage> {
         ],
       ),
       body: adminVm.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: AppColors.mainColor))
           : Column(
         children: [
           _buildDashboard(adminVm),
           _buildCategoryBar(),
           Expanded(child: _buildProductList(adminVm, filteredProducts)),
+        Padding(
+        padding: const EdgeInsets.only(top: 20, bottom: 75),
+        child: Column(
+          children: [
+            const Text(
+              "withSell v1.0.0",
+              style: TextStyle(color: Colors.grey, fontSize: 13),
+            ),
+            TextButton.icon(
+              onPressed: () {
+                showLicensePage(
+                  context: context,
+                  applicationName: 'withSell',
+                  applicationVersion: '1.0.0',
+                  applicationLegalese: '© 2026 withSell. All rights reserved.',
+                );
+              },
+              icon: const Icon(Icons.description_outlined, size: 18, color: Colors.grey),
+              label: const Text(
+                "Open Source License",
+                style: TextStyle(color: Colors.grey, decoration: TextDecoration.underline),
+              ),
+            ),
+          ],
+        ),
+      ),
         ],
       ),
       floatingActionButton: _buildFabMenu(context, adminVm),
@@ -258,7 +284,7 @@ class _AdminPageState extends State<AdminPage> {
               backgroundColor: Colors.white,
               elevation: 4,
               icon: Icon(Icons.sync_rounded, color: AppColors.mainColor),
-              label: Text("목록 동기화", style: TextStyle(color: AppColors.mainColor, fontWeight: FontWeight.bold, fontSize: 16)),
+              label: Text("목록 동기화", style: TextStyle(color: AppColors.mainColor, fontWeight: FontWeight.bold, fontSize: 20)),
             ),
           ),
           const SizedBox(width: 12),
@@ -270,7 +296,7 @@ class _AdminPageState extends State<AdminPage> {
               backgroundColor: Colors.orangeAccent,
               elevation: 4,
               icon: const Icon(Icons.add_rounded, color: Colors.white),
-              label: const Text("상품 추가", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+              label: const Text("상품 추가", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
             ),
           ),
         ],

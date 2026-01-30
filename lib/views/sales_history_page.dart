@@ -51,7 +51,7 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
         ],
       ),
       body: vm.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: AppColors.mainColor,))
           : vm.history.isEmpty
           ? const Center(
               child: Text(
