@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project/constants/constants.dart';
 import 'package:project/viewmodels/admin_auth_view_model.dart';
 import 'package:project/views/common_snack_bar.dart';
 import 'package:project/views/sales_history_base_dialog.dart';
@@ -185,7 +186,7 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
                                 title: Row(
                                   children: [
                                     Text(
-                                      "금액 ${record['totalAmount']}원",
+                                      "금액 ${AppFormat.won(record['totalAmount'])}원",
                                       style: TextStyle(
                                         fontSize: 22,
                                         fontWeight: FontWeight.w900,
@@ -307,7 +308,7 @@ class _SalesHistoryPageState extends State<SalesHistoryPage> {
                                                 ),
                                                 const SizedBox(width: 15),
                                                 Text(
-                                                  "${item['totalPrice']}원",
+                                                  "${AppFormat.won(item['totalPrice'])}원",
                                                   style: const TextStyle(
                                                     fontSize: 18,
                                                     fontWeight: FontWeight.w900,

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:project/constants/constants.dart';
 import 'package:project/models/product_category.dart';
 import 'package:project/viewmodels/product_view_model.dart';
 import 'package:project/viewmodels/sales_history_view_model.dart';
@@ -209,7 +210,7 @@ class _ProductPageState extends State<ProductPage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          "${p.price}원",
+                          "${AppFormat.won(p.price)} 원",
                           style: TextStyle(fontSize: 30, color: Colors.grey[700], fontWeight: FontWeight.w600),
                         ),
                         const Spacer(),
@@ -252,7 +253,7 @@ class _ProductPageState extends State<ProductPage> {
                                           borderRadius: BorderRadius.circular(999),
                                         ),
                                         child: Text(
-                                          "할인 -$discountAmount원",
+                                          "할인 -${AppFormat.won(discountAmount)}원",
                                           style: const TextStyle(
                                             color: Color(0xFFE5484D),
                                             fontWeight: FontWeight.w800,
@@ -266,7 +267,7 @@ class _ProductPageState extends State<ProductPage> {
                                     fit: BoxFit.scaleDown,
                                     alignment: Alignment.centerRight,
                                     child: Text(
-                                      "$totalPrice원",
+                                      "${AppFormat.won(totalPrice)}원",
                                       style: const TextStyle(fontSize: 37, fontWeight: FontWeight.w900, color: Colors.black),
                                     ),
                                   ),
@@ -294,7 +295,7 @@ class _ProductPageState extends State<ProductPage> {
             elevation: 4,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
             onPressed: () => _showPaymentMethodDialog(context),
-            label: Text("${vm.getTotalCartPrice()}원 결제하기", style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w900, color: Colors.white)),
+            label: Text("${AppFormat.won(vm.getTotalCartPrice())}원 결제하기", style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w900, color: Colors.white)),
             icon: const Icon(Icons.payment, color: Colors.white, size: 28),
           ),
         ),
@@ -517,7 +518,7 @@ class _ProductPageState extends State<ProductPage> {
                                           children: [
                                             Expanded(flex: 3, child: Text(p.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500))),
                                             Expanded(flex: 1, child: Text("${vm.getQuantity(p.productNumber)}개", textAlign: TextAlign.center, style: const TextStyle(fontSize: 18, color: Colors.grey))),
-                                            Expanded(flex: 2, child: Text("${vm.getTotalPriceWithDiscount(p.productNumber)}원", textAlign: TextAlign.right, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900))),
+                                            Expanded(flex: 2, child: Text("${AppFormat.won(vm.getTotalPriceWithDiscount(p.productNumber))}원", textAlign: TextAlign.right, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900))),
                                           ],
                                         ),
                                       );
@@ -527,7 +528,7 @@ class _ProductPageState extends State<ProductPage> {
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         const Text("최종 합계", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24)),
-                                        Text("$finalTotal원", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 30, color: AppColors.mainColor)),
+                                        Text("${AppFormat.won(finalTotal)}원", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 30, color: AppColors.mainColor)),
                                       ],
                                     )
                                   ],
@@ -543,7 +544,7 @@ class _ProductPageState extends State<ProductPage> {
                                     onTap: () {
                                       _showCashInputPad(context, (totalAmount) {
                                         setDialogState(() {
-                                          cashController.text = totalAmount.toString();
+                                          cashController.text = AppFormat.won(totalAmount).toString();
                                         });
                                       });
                                     },
@@ -595,7 +596,7 @@ class _ProductPageState extends State<ProductPage> {
                                     children: [
                                       const Text("거스름 돈", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.grey)),
                                       Text(
-                                        "${change < 0 ? 0 : change} 원",
+                                        "${change < 0 ? 0 : AppFormat.won(change)} 원",
                                         style: TextStyle(
                                             fontSize: 35,
                                             fontWeight: FontWeight.w900,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:project/constants/constants.dart';
 import 'package:project/models/product_category.dart';
 import 'package:project/viewmodels/admin_auth_view_model.dart';
 import 'package:project/viewmodels/admin_view_model.dart';
@@ -246,8 +247,8 @@ class _AdminPageState extends State<AdminPage> {
                           const SizedBox(height: 4),
                           Text(
                             p.discountQuantity > 0
-                                ? "${p.price}원 (${p.discountQuantity}개 구매 시 ${p.discountPrice}원 할인 적용중)"
-                                : "${p.price}원 (할인 없음)",
+                                ? "${AppFormat.won(p.price)}원 (${p.discountQuantity}개 구매 시 ${AppFormat.won(p.discountPrice)}원 할인 적용중)"
+                                : "${AppFormat.won(p.price)}원 (할인 없음)",
                             style: TextStyle(color: Colors.grey[600], fontSize: 14),
                           ),
                         ],

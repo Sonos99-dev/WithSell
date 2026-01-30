@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:project/constants/constants.dart';
 import 'package:project/viewmodels/sales_history_view_model.dart';
 import 'package:project/viewmodels/settlement_view_model.dart';
 import 'package:project/views/app_color.dart';
@@ -225,7 +226,7 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 5),
-            child: Text("일일 판매 금액: ${total}원",
+            child: Text("일일 판매 금액: ${AppFormat.won(total)}원",
                 style: const TextStyle(color: Colors.white, fontSize: 34, fontWeight: FontWeight.w900)),
           ),
           Text("$dateDisplay 기록",
@@ -463,7 +464,7 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
                     children: [
                       Text("$count개 판매", style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.mainColor)),
                       Text(" / ", style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w600)),
-                      Text("누적 ${totalPay}원",
+                      Text("누적 ${AppFormat.won(totalPay)}원",
                           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.mainColor)),
                     ],
                   ),
@@ -503,7 +504,7 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
             leading: Icon(isMe ? Icons.stars : Icons.tablet_android, color: isMe ? Colors.orange : Colors.grey, size: 18),
             title: Text(isMe ? "내 기기 (현재) (${dev.uuid.substring(0, 8)})" : "기기$index, (${dev.uuid.substring(0, 8)})",
                 style: TextStyle(fontWeight: isMe ? FontWeight.w900 : FontWeight.w900, fontSize: 13)),
-            trailing: Text("${daily?.totalAmount ?? 0}원",
+            trailing: Text("${AppFormat.won(daily?.totalAmount ?? 0)}원",
                 style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
           );
         },
