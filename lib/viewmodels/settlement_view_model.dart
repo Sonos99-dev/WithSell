@@ -95,19 +95,30 @@ class SettlementViewModel extends ChangeNotifier {
       List items = record['items'] ?? [];
 
       if (!dailyMap.containsKey(dateKey)) {
-        dailyMap[dateKey] = DailySettlement(totalAmount: 0, cardAmount: 0, cashAmount: 0, productCounts: {});
+        dailyMap[dateKey] = DailySettlement(
+            totalAmount: 0,
+            cardAmount: 0,
+            cashAmount: 0,
+            productCounts: {},
+            productAmounts: {}
+        );
       }
 
       var current = dailyMap[dateKey]!;
       int newTotal = current.totalAmount + amount;
       int newCard = current.cardAmount + (isCard ? amount : 0);
       int newCash = current.cashAmount + (!isCard ? amount : 0);
+
       Map<String, int> newProducts = Map.from(current.productCounts);
+      Map<String, int> newAmounts = Map.from(current.productAmounts);
 
       for (var item in items) {
         String name = item['name'];
         int qty = item['quantity'];
+        int itemTotal = item['totalPrice'] ?? 0;
+
         newProducts[name] = (newProducts[name] ?? 0) + qty;
+        newAmounts[name] = (newAmounts[name] ?? 0) + itemTotal;
       }
 
       dailyMap[dateKey] = DailySettlement(
@@ -115,6 +126,7 @@ class SettlementViewModel extends ChangeNotifier {
         cardAmount: newCard,
         cashAmount: newCash,
         productCounts: newProducts,
+        productAmounts: newAmounts
       );
     }
 
@@ -170,8 +182,9 @@ class SettlementViewModel extends ChangeNotifier {
   Map<String, dynamic> getFilteredSummary() {
     int total = 0, card = 0, cash = 0;
     Map<String, int> products = {};
+    Map<String, int> productAmounts = {};
 
-    if (_selectedDate == null) return {'total': 0, 'card': 0, 'cash': 0, 'products': {}};
+    if (_selectedDate == null) return {'total': 0, 'card': 0, 'cash': 0, 'products': {}, 'productAmounts': {}};
 
     _allDevicesData.forEach((uuid, model) {
       // 'all'이거나 선택된 기기 ID와 일치할 때만 합산
@@ -184,6 +197,9 @@ class SettlementViewModel extends ChangeNotifier {
           daily.productCounts.forEach((name, qty) {
             products[name] = (products[name] ?? 0) + qty;
           });
+          daily.productAmounts.forEach((name, amt) {
+            productAmounts[name] = (productAmounts[name] ?? 0) + amt;
+          });
         }
       }
     });
@@ -193,6 +209,7 @@ class SettlementViewModel extends ChangeNotifier {
       'card': card,
       'cash': cash,
       'products': products,
+      'productAmounts': productAmounts,
     };
   }
 

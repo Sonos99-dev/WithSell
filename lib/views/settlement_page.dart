@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:project/viewmodels/sales_history_view_model.dart';
 import 'package:project/viewmodels/settlement_view_model.dart';
 import 'package:project/views/app_color.dart';
@@ -157,7 +158,7 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
           Column(
             children: [
               _buildFilterBar(settlementVm, sortedDates),
-              _buildCollapsibleDashboard(summary),
+              _buildCollapsibleDashboard(summary, settlementVm.selectedDate),
               Expanded(
                 child: RefreshIndicator(
                   color: AppColors.mainColor,
@@ -169,9 +170,9 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
                     children: [
                       const SizedBox(height: 15),
                       _buildSectionHeader("상세 판매 품목", Icons.list_alt),
-                      _buildCompactProductTable(summary['products']),
+                      _buildCompactProductTable(summary),
                       const SizedBox(height: 20),
-                      _buildSectionHeader("기기별 연결 상태", Icons.devices),
+                      _buildSectionHeader("기기별 판매 현황 (${settlementVm.selectedDate})", Icons.devices),
                       _buildCompactDeviceTable(settlementVm),
                       const SizedBox(height: 80),
                     ],
@@ -202,8 +203,17 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
     );
   }
 
-  Widget _buildCollapsibleDashboard(Map<String, dynamic> data) {
+  Widget _buildCollapsibleDashboard(Map<String, dynamic> data, String? selectedDate) {
     final int total = data['total'];
+    String dateDisplay = "날짜 미선택";
+    if (selectedDate != null) {
+      try {
+        DateTime parsedDate = DateTime.parse(selectedDate);
+        dateDisplay = DateFormat('M월 d일').format(parsedDate);
+      } catch (e) {
+        dateDisplay = selectedDate; // 파싱 실패 시 원본 유지
+      }
+    }
 
     return Container(
       width: double.infinity,
@@ -215,7 +225,7 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 5, bottom: 5),
-            child: Text("총 판매 금액: ${total}원",
+            child: Text("일일 판매 금액: ${total}원",
                 style: const TextStyle(color: Colors.white, fontSize: 34, fontWeight: FontWeight.w900)),
           ),
           SizeTransition(
@@ -412,28 +422,54 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
     );
   }
 
-  Widget _buildCompactProductTable(Map<String, int> products) {
+  Widget _buildCompactProductTable(Map<String, dynamic> summary) {
+    // getFilteredSummary에서 넘겨받은 데이터
+    final products = Map<String, int>.from(summary['products'] ?? {});
+    final productAmounts = Map<String, int>.from(summary['productAmounts'] ?? {});
+
     if (products.isEmpty) return _buildEmptyBox("데이터가 없습니다.");
+
+    // 수량 많은 순 정렬
     final sortedEntries = products.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
+
     return Container(
       decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)]),
       child: Column(
-        children: sortedEntries.map((e) => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-              border: e.key == sortedEntries.last.key ? null : Border(bottom: BorderSide(color: Colors.grey[100]!))),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(e.key, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-              Text("${e.value}개", style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.mainColor)),
-            ],
-          ),
-        )).toList(),
+        children: sortedEntries.map((e) {
+          final name = e.key;
+          final count = e.value;
+          final totalPay = productAmounts[name] ?? 0; // 누적 합계 금액
+
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+                border: name == sortedEntries.last.key ? null : Border(bottom: BorderSide(color: Colors.grey[100]!))),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text(name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                ),
+                Expanded(
+                  flex: 4,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text("$count개 판매", style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.mainColor)),
+                      Text(" / ", style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w600)),
+                      Text("누적 ${totalPay}원",
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.mainColor)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
       ),
     );
   }

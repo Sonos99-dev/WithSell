@@ -21,12 +21,14 @@ class DailySettlement {
   final int cardAmount;
   final int cashAmount;
   final Map<String, int> productCounts;
+  final Map<String, int> productAmounts;
 
   DailySettlement({
     required this.totalAmount,
     required this.cardAmount,
     required this.cashAmount,
     required this.productCounts,
+    required this.productAmounts,
   });
 
   Map<String, dynamic> toJson() => {
@@ -34,6 +36,7 @@ class DailySettlement {
     'cardAmount': cardAmount,
     'cashAmount': cashAmount,
     'productCounts': productCounts,
+    'productAmounts': productAmounts,
   };
 
   factory DailySettlement.fromJson(Map<String, dynamic> json) {
@@ -42,6 +45,7 @@ class DailySettlement {
       cardAmount: json['cardAmount'] ?? 0,
       cashAmount: json['cashAmount'] ?? 0,
       productCounts: Map<String, int>.from(json['productCounts'] ?? {}),
+      productAmounts: Map<String, int>.from(json['productAmounts'] ?? {}),
     );
   }
 }
