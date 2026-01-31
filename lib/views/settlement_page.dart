@@ -538,7 +538,7 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
     final String? effectiveValue = (value != null && items.contains(value)) ? value : items.first;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.15),
           borderRadius: BorderRadius.circular(10)
@@ -549,7 +549,7 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
           dropdownColor: AppColors.mainColor,
           icon: Icon(icon, color: Colors.white, size: 14),
           isExpanded: true,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18),
           items: items.map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
           onChanged: onChanged,
         ),
@@ -558,11 +558,10 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
   }
 
   Widget _buildDeviceDropdown(SettlementViewModel vm) {
-    // 1. 내 기기(myUuid)를 제외한 나머지 기기들의 ID 목록을 추출합니다.
     final otherDeviceIds = vm.allDevicesData.keys.where((uuid) => uuid != vm.myUuid).toList();
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -570,7 +569,7 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
           dropdownColor: AppColors.mainColor,
           icon: const Icon(Icons.tablet_android, color: Colors.white, size: 14),
           isExpanded: true,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18),
           items: [
             const DropdownMenuItem(value: "all", child: Text("전체 통합")),
             DropdownMenuItem(value: vm.myUuid, child: Text("현재 기기")),
