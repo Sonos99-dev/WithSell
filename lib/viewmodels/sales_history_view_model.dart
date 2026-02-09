@@ -7,9 +7,14 @@ class SalesHistoryViewModel extends ChangeNotifier {
   static const String dateFormatStr = 'yyyy-MM-dd';
   List<dynamic> _history = [];
   List<dynamic> get history => _history;
-  final SharedPreferences _prefs;
+  late SharedPreferences _prefs;
 
-  SalesHistoryViewModel(this._prefs);
+  SalesHistoryViewModel();
+
+  Future<void> init(SharedPreferences prefs) async {
+    _prefs = prefs;
+    await loadHistory();
+  }
 
   String? _selectedDate;
   String? get selectedDate => _selectedDate;

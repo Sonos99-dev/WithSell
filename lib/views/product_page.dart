@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -20,22 +21,39 @@ class ProductPage extends StatefulWidget {
 class _ProductPageState extends State<ProductPage> {
   ProductCategory _selectedCategory = ProductCategory.all;
 
+  @override
   Widget build(BuildContext context) {
     final vm = context.watch<ProductViewModel>();
     final filteredProducts = _selectedCategory == ProductCategory.all
         ? vm.products
         : vm.products.where((p) => p.category == _selectedCategory).toList();
 
+    final mq = MediaQuery.of(context);
+    final size = mq.size;
+
+    const designW = 1280.0;
+    const designH = 800.0;
+
+    final scale =
+    math.min(size.width / designW, size.height / designH).clamp(0.70, 1.05);
+
+    double s(double v) => v * scale;
+    double sp(double v) => v * scale;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F7),
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(80),
+        preferredSize: Size.fromHeight(s(64) + mq.padding.top),
         child: Container(
-          padding: const EdgeInsets.only(top: 40, bottom: 10),
+          padding: EdgeInsets.only(top: mq.padding.top + s(8), bottom: s(8)),
           decoration: BoxDecoration(
             color: AppColors.mainColor,
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: s(4),
+                offset: Offset(0, s(2)),
+              )
             ],
           ),
           child: Row(
@@ -43,59 +61,77 @@ class _ProductPageState extends State<ProductPage> {
               Expanded(
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  padding: EdgeInsets.symmetric(horizontal: s(12)),
                   child: Row(
                     children: ProductCategory.values.map((category) {
                       final isSelected = _selectedCategory == category;
 
                       int categoryCartCount = 0;
                       if (category == ProductCategory.all) {
-                        categoryCartCount = vm.products.fold(0, (sum, p) => sum + vm.getQuantity(p.productNumber));
+                        categoryCartCount = vm.products.fold(
+                          0,
+                              (sum, p) => sum + vm.getQuantity(p.productNumber),
+                        );
                       } else {
                         categoryCartCount = vm.products
                             .where((p) => p.category == category)
-                            .fold(0, (sum, p) => sum + vm.getQuantity(p.productNumber));
+                            .fold(
+                          0,
+                              (sum, p) => sum + vm.getQuantity(p.productNumber),
+                        );
                       }
+
                       return Padding(
-                        padding: const EdgeInsets.only(right: 12),
+                        padding: EdgeInsets.only(right: s(10)),
                         child: ChoiceChip(
                           showCheckmark: false,
                           label: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                             Text(category.label),
+                              Text(category.label, style: TextStyle(fontSize: sp(24)),),
                               if (categoryCartCount > 0) ...[
-                                const SizedBox(width: 8),
+                                SizedBox(width: s(6)),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: s(8), vertical: s(2)),
                                   decoration: BoxDecoration(
-                                    color: isSelected ? AppColors.mainColor : Colors.redAccent,
-                                    borderRadius: BorderRadius.circular(12),
+                                    color: isSelected
+                                        ? AppColors.mainColor
+                                        : Colors.redAccent,
+                                    borderRadius: BorderRadius.circular(s(12)),
                                   ),
                                   child: Text(
                                     '$categoryCartCount',
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: sp(16),
                                       fontWeight: FontWeight.w900,
                                       color: Colors.white,
                                     ),
                                   ),
                                 ),
                               ],
-                          ]),
+                            ],
+                          ),
                           selected: isSelected,
-                          onSelected: (selected) {
+                          onSelected: (_) {
                             setState(() => _selectedCategory = category);
                           },
                           selectedColor: Colors.white,
                           backgroundColor: AppColors.mainColor.withOpacity(0.8),
-                          shape: StadiumBorder(side: BorderSide(color: Colors.white.withOpacity(0.5))),
-                          labelStyle: TextStyle(
-                            color: isSelected ? AppColors.mainColor : Colors.white,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 22,
+                          shape: StadiumBorder(
+                            side: BorderSide(color: Colors.white.withOpacity(0.5)),
                           ),
-                          padding: (categoryCartCount > 0) ?  const EdgeInsets.fromLTRB(16, 10, 7, 10) : EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          labelStyle: TextStyle(
+                            color:
+                            isSelected ? AppColors.mainColor : Colors.white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: sp(22),
+                          ),
+                          padding: (categoryCartCount > 0)
+                              ? EdgeInsets.fromLTRB(
+                              s(14), s(8), s(6), s(8))
+                              : EdgeInsets.symmetric(
+                              horizontal: s(14), vertical: s(8)),
                         ),
                       );
                     }).toList(),
@@ -103,7 +139,7 @@ class _ProductPageState extends State<ProductPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(right: 15, left: 5),
+                padding: EdgeInsets.only(right: s(12), left: s(4)),
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
@@ -111,24 +147,25 @@ class _ProductPageState extends State<ProductPage> {
                       HapticFeedback.mediumImpact();
                       vm.clearQuantities();
                     },
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(s(12)),
                     splashColor: Colors.white.withOpacity(0.3),
                     highlightColor: Colors.white.withOpacity(0.1),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: s(8), vertical: s(4)),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.refresh_rounded,
                             color: Colors.white,
-                            size: 30,
+                            size: s(50),
                           ),
-                          const Text(
+                          Text(
                             "선택 초기화",
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 11,
+                              fontSize: sp(15),
                             ),
                           )
                         ],
@@ -142,161 +179,247 @@ class _ProductPageState extends State<ProductPage> {
         ),
       ),
       body: filteredProducts.isEmpty
-          ? const Center(child: Text("등록된 상품이 없습니다.", style: TextStyle(fontSize: 20)))
-          : GridView.builder(
-        padding: const EdgeInsets.fromLTRB(12, 20, 12, 110),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: MediaQuery.of(context).orientation == Orientation.landscape ? 2 : 1,
-          childAspectRatio: 2.1,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
+          ? Center(
+        child: Text(
+          "등록된 상품이 없습니다.",
+          style: TextStyle(fontSize: sp(30)),
         ),
-        itemCount: filteredProducts.length,
-        itemBuilder: (_, index) {
-          final p = filteredProducts[index];
-          final quantity = vm.getQuantity(p.productNumber);
-          final totalPrice = vm.getTotalPriceWithDiscount(p.productNumber);
-          final discountAmount = vm.getDiscountAmount(p.productNumber);
+      )
+          : LayoutBuilder(
+        builder: (context, constraints) {
+          final w = constraints.maxWidth;
+          final crossAxisCount = (w / s(520)).floor().clamp(1, 2);
+          final childAspectRatio = w < 480 ? 1.8 : (w < 900 ? 1.6 : 2.10);
 
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: quantity > 0 ? AppColors.mainColor : Colors.transparent,
-                width: 3,
-              ),
-              boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 3))
-              ],
+          return GridView.builder(
+            padding: EdgeInsets.fromLTRB(s(12), s(20), s(12), s(110)),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              childAspectRatio: childAspectRatio,
+              mainAxisSpacing: s(12),
+              crossAxisSpacing: s(12),
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 5,
-                  child: Container(
-                    height: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), bottomLeft: Radius.circular(16)),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), bottomLeft: Radius.circular(16)),
-                      child: p.imgUrl.isNotEmpty
-                          ? CachedNetworkImage(
-                        imageUrl: p.imgUrl,
-                        fit: BoxFit.cover,
-                        placeholder: (_, __) => const Center(child: CupertinoActivityIndicator()),
-                        errorWidget: (_, __, ___) => const Icon(Icons.image_not_supported, color: Colors.grey),
-                      )
-                          : const Icon(Icons.image, color: Colors.grey, size: 50),
-                    ),
-                  ),
-                ),
+            itemCount: filteredProducts.length,
+            itemBuilder: (_, index) {
+              final p = filteredProducts[index];
+              final quantity = vm.getQuantity(p.productNumber);
+              final totalPrice =
+              vm.getTotalPriceWithDiscount(p.productNumber);
+              final discountAmount =
+              vm.getDiscountAmount(p.productNumber);
 
-                Expanded(
-                  flex: 6,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(15, 12, 15, 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          p.name,
-                          style: TextStyle(fontSize: 35, fontWeight: FontWeight.w900, color: quantity > 0 ? AppColors.mainColor : Colors.black, height: 1.1),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(s(16)),
+                  border: Border.all(
+                    color: quantity > 0
+                        ? AppColors.mainColor
+                        : Colors.transparent,
+                    width: s(3),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: s(8),
+                      offset: Offset(0, s(3)),
+                    )
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 4,
+                      child: Container(
+                        height: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(s(16)),
+                            bottomLeft: Radius.circular(s(16)),
+                          ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "${AppFormat.won(p.price)} 원",
-                          style: TextStyle(fontSize: 30, color: Colors.grey[700], fontWeight: FontWeight.w600),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(s(16)),
+                            bottomLeft: Radius.circular(s(16)),
+                          ),
+                          child: p.imgUrl.isNotEmpty
+                              ? CachedNetworkImage(
+                            imageUrl: p.imgUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) => const Center(
+                                child: CupertinoActivityIndicator()),
+                            errorWidget: (_, __, ___) =>
+                            const Icon(Icons.image_not_supported,
+                                color: Colors.grey),
+                          )
+                              : Icon(Icons.image,
+                              color: Colors.grey, size: s(48)),
                         ),
-                        const Spacer(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 6,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                            s(15), s(12), s(15), s(12)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              height: 55,
-                              decoration: BoxDecoration(
-                                  color: Colors.grey[100],
-                                  borderRadius: BorderRadius.circular(15),
+                            Text(
+                              p.name,
+                              style: TextStyle(
+                                fontSize: sp(30),
+                                fontWeight: FontWeight.w900,
+                                color: quantity > 0
+                                    ? AppColors.mainColor
+                                    : Colors.black,
+                                height: 1.1,
                               ),
-                              child: Row(
-                                children: [
-                                  _buildCircularQtyBtn(Icons.remove, Colors.blue, () {
-                                    if (quantity > 0) vm.setQuantity(p.productNumber, quantity - 1);
-                                  }),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                                    child: Text("$quantity", style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w900)),
-                                  ),
-                                  _buildCircularQtyBtn(Icons.add, Colors.red, () => vm.setQuantity(p.productNumber, quantity + 1)),
-                                ],
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            SizedBox(height: s(4)),
+                            Text(
+                              "${AppFormat.won(p.price)} 원",
+                              style: TextStyle(
+                                fontSize: sp(28),
+                                color: Colors.grey[700],
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (discountAmount > 0)
-                                    FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFFFEFF0),
-                                          borderRadius: BorderRadius.circular(999),
-                                        ),
+                            const Spacer(),
+                            Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  height: s(50),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[100],
+                                    borderRadius:
+                                    BorderRadius.circular(s(15)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      _buildCircularQtyBtn(
+                                        Icons.remove,
+                                        Colors.blue,
+                                            () {
+                                          if (quantity > 0) {
+                                            vm.setQuantity(
+                                                p.productNumber,
+                                                quantity - 1);
+                                          }
+                                        },
+                                        s,
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: s(12)),
                                         child: Text(
-                                          "할인 -${AppFormat.won(discountAmount)}원",
-                                          style: const TextStyle(
-                                            color: Color(0xFFE5484D),
-                                            fontWeight: FontWeight.w800,
-                                            fontSize: 16,
+                                          "$quantity",
+                                          style: TextStyle(
+                                            fontSize: sp(24),
+                                            fontWeight: FontWeight.w900,
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  const SizedBox(height: 2),
-                                  FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    alignment: Alignment.centerRight,
-                                    child: Text(
-                                      "${AppFormat.won(totalPrice)}원",
-                                      style: const TextStyle(fontSize: 37, fontWeight: FontWeight.w900, color: Colors.black),
-                                    ),
+                                      _buildCircularQtyBtn(
+                                        Icons.add,
+                                        Colors.red,
+                                            () => vm.setQuantity(
+                                            p.productNumber,
+                                            quantity + 1),
+                                        s,
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                                SizedBox(width: s(8)),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.end,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (discountAmount > 0)
+                                        FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: s(14),
+                                                vertical: s(4)),
+                                            decoration: BoxDecoration(
+                                              color:
+                                              const Color(0xFFFFEFF0),
+                                              borderRadius:
+                                              BorderRadius.circular(999),
+                                            ),
+                                            child: Text(
+                                              "할인 -${AppFormat.won(discountAmount)}원",
+                                              style: TextStyle(
+                                                color: const Color(
+                                                    0xFFE5484D),
+                                                fontWeight:
+                                                FontWeight.w800,
+                                                fontSize: sp(16),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      SizedBox(height: s(2)),
+                                      FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        alignment: Alignment.centerRight,
+                                        child: Text(
+                                          "${AppFormat.won(totalPrice)}원",
+                                          style: TextStyle(
+                                            fontSize: sp(26),
+                                            fontWeight: FontWeight.w900,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           );
         },
       ),
       floatingActionButton: Visibility(
         visible: filteredProducts.isNotEmpty && vm.getTotalCartPrice() != 0,
         child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.95,
-          height: 80,
+          width: size.width * 0.95,
+          height: s(80),
           child: FloatingActionButton.extended(
             backgroundColor: Colors.orange[700],
             elevation: 4,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-            onPressed: () => _showPaymentMethodDialog(context),
-            label: Text("${AppFormat.won(vm.getTotalCartPrice())}원 결제하기", style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w900, color: Colors.white)),
-            icon: const Icon(Icons.payment, color: Colors.white, size: 28),
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+            onPressed: () => _showPaymentMethodDialog(context, s, sp),
+            label: Text(
+              "${AppFormat.won(vm.getTotalCartPrice())}원 결제하기",
+              style: TextStyle(
+                fontSize: sp(35),
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+              ),
+            ),
+            icon: Icon(Icons.payment, color: Colors.white, size: s(24)),
           ),
         ),
       ),
@@ -304,84 +427,103 @@ class _ProductPageState extends State<ProductPage> {
     );
   }
 
-  Widget _buildCircularQtyBtn(IconData icon, Color color, VoidCallback onPressed) {
+  Widget _buildCircularQtyBtn(
+      IconData icon,
+      Color color,
+      VoidCallback onPressed,
+      double Function(double) s,
+      ) {
     return InkWell(
       onTap: onPressed,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(s(12)),
       child: Container(
-        width: 55,
+        width: s(50),
         height: double.infinity,
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(s(12)),
         ),
         child: Icon(
           icon,
           color: color,
-          size: 32,
+          size: s(35),
         ),
       ),
     );
   }
 
-
-  void _showPaymentMethodDialog(BuildContext context) {
+  void _showPaymentMethodDialog(
+      BuildContext context,
+      double Function(double) s,
+      double Function(double) sp,
+      ) {
     showDialog(
       context: context,
       barrierDismissible: true,
       builder: (context) {
+        final w = MediaQuery.of(context).size.width;
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(s(25))),
           elevation: 10,
           child: Container(
-            width: 450,
-            padding: const EdgeInsets.all(20),
+            width: math.min(w * 0.92, s(450)),
+            padding: EdgeInsets.symmetric(vertical: s(10), horizontal: s(20)),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Align(
                   alignment: Alignment.topRight,
                   child: IconButton(
-                    icon: const Icon(Icons.close, size: 30),
+                    icon: Icon(Icons.close, size: s(28)),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
-                const Text(
+                Text(
                   "결제 방법",
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: -1),
+                  style: TextStyle(
+                    fontSize: sp(32),
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -1,
+                  ),
                 ),
-                const SizedBox(height: 10),
-                const Text("진행하실 결제 수단을 선택해 주세요.",
-                    style: TextStyle(fontSize: 18, color: Colors.grey)),
-                const SizedBox(height: 35),
+                SizedBox(height: s(8)),
+                Text(
+                  "진행하실 결제 수단을 선택해 주세요.",
+                  style: TextStyle(fontSize: sp(18), color: Colors.grey),
+                ),
+                SizedBox(height: s(18)),
                 Row(
                   children: [
                     _buildPaymentOption(
                       context,
+                      s: s,
+                      sp: sp,
                       title: "현금 또는 계좌 이체",
                       subtitle: "CASH",
                       icon: Icons.monetization_on_rounded,
                       color: Colors.orange,
                       onTap: () {
                         Navigator.pop(context);
-                        _showSaveDialog(context, false);
+                        _showSaveDialog(context, false, s, sp);
                       },
                     ),
-                    const SizedBox(width: 20),
+                    SizedBox(width: s(12)),
                     _buildPaymentOption(
                       context,
+                      s: s,
+                      sp: sp,
                       title: "카드 결제",
                       subtitle: "CARD",
                       icon: Icons.credit_card_rounded,
                       color: Colors.blue,
                       onTap: () {
                         Navigator.pop(context);
-                        _showSaveDialog(context, true);
+                        _showSaveDialog(context, true, s, sp);
                       },
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: s(10)),
               ],
             ),
           ),
@@ -390,28 +532,51 @@ class _ProductPageState extends State<ProductPage> {
     );
   }
 
-  Widget _buildPaymentOption(BuildContext context,
-      {required String title, required String subtitle, required IconData icon, required Color color, required VoidCallback onTap}) {
+  Widget _buildPaymentOption(
+      BuildContext context, {
+        required String title,
+        required String subtitle,
+        required IconData icon,
+        required Color color,
+        required VoidCallback onTap,
+        required double Function(double) s,
+        required double Function(double) sp,
+      }) {
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          height: 160,
+          height: s(160),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: color.withOpacity(0.2), width: 2),
+            borderRadius: BorderRadius.circular(s(20)),
+            border: Border.all(color: color.withOpacity(0.2), width: s(2)),
             boxShadow: [
-              BoxShadow(color: color.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))
+              BoxShadow(
+                color: color.withOpacity(0.1),
+                blurRadius: s(10),
+                offset: Offset(0, s(4)),
+              )
             ],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 50, color: color),
-              const SizedBox(height: 12),
-              Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
-              Text(subtitle, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: color.withOpacity(0.6))),
+              Icon(icon, size: s(60), color: color),
+              SizedBox(height: s(10)),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: sp(20), fontWeight: FontWeight.w900),
+              ),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: sp(14),
+                  fontWeight: FontWeight.w900,
+                  color: color.withOpacity(0.6),
+                ),
+              ),
             ],
           ),
         ),
@@ -419,14 +584,19 @@ class _ProductPageState extends State<ProductPage> {
     );
   }
 
-  void _showSaveDialog(BuildContext context, bool isCardPayment) {
+  void _showSaveDialog(
+      BuildContext context,
+      bool isCardPayment,
+      double Function(double) s,
+      double Function(double) sp,
+      ) {
     final vm = context.read<ProductViewModel>();
     final int finalTotal = vm.getTotalCartPrice();
-    final selectedProducts = vm.products.where((p) => vm.getQuantity(p.productNumber) > 0).toList();
+    final selectedProducts =
+    vm.products.where((p) => vm.getQuantity(p.productNumber) > 0).toList();
 
     final TextEditingController cashController = TextEditingController();
     final FocusNode cashFocusNode = FocusNode();
-
 
     showDialog(
       context: context,
@@ -438,38 +608,47 @@ class _ProductPageState extends State<ProductPage> {
             cashFocusNode.addListener(() {
               if (context.mounted) setDialogState(() {});
             });
+
             int receivedAmount = int.tryParse(cashController.text) ?? 0;
             int change = receivedAmount - finalTotal;
 
+            final w = MediaQuery.of(context).size.width;
+
             return Dialog(
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25)),
+                  borderRadius: BorderRadius.circular(s(25))),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.85,
-                  maxWidth: 500,
+                  maxHeight: MediaQuery.of(context).size.height * 1.0,
+                  maxWidth: math.min(w * 0.95, s(600)),
                 ),
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(25),
+                    borderRadius: BorderRadius.circular(s(25)),
                     border: Border(
-                        left: BorderSide(
-                            color: isCardPayment ? Colors.blue : Colors.orange,
-                            width: 10)),
+                      left: BorderSide(
+                        color: isCardPayment ? Colors.blue : Colors.orange,
+                        width: s(10),
+                      ),
+                    ),
                     color: Colors.white,
                   ),
-                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                  padding: EdgeInsets.fromLTRB(s(18), s(8), s(18), s(18)),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text("결제 영수증 확인",
-                              style: TextStyle(
-                                  fontSize: 30, fontWeight: FontWeight.w900)),
+                          Text(
+                            "결제 영수증 확인",
+                            style: TextStyle(
+                              fontSize: sp(30),
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
                           IconButton(
-                            icon: const Icon(Icons.close, size: 35),
+                            icon: Icon(Icons.close, size: s(30)),
                             onPressed: () {
                               cashFocusNode.dispose();
                               Navigator.pop(context);
@@ -483,59 +662,132 @@ class _ProductPageState extends State<ProductPage> {
                           physics: const BouncingScrollPhysics(),
                           child: Column(
                             children: [
-                              const SizedBox(height: 10),
+                              SizedBox(height: s(8)),
                               Text(
                                 "결제 수단: ${isCardPayment ? '카드 결제 (CARD)' : '현금 결제 (CASH)'}",
                                 style: TextStyle(
-                                    fontSize: 20,
-                                    color: isCardPayment
-                                        ? Colors.blue
-                                        : Colors.orange,
-                                    fontWeight: FontWeight.w900),
+                                  fontSize: sp(20),
+                                  color: isCardPayment ? Colors.blue : Colors.orange,
+                                  fontWeight: FontWeight.w900,
+                                ),
                               ),
-                              const SizedBox(height: 20),
+                              SizedBox(height: s(12)),
                               Container(
-                                padding: const EdgeInsets.all(16),
+                                padding: EdgeInsets.all(s(12)),
                                 decoration: BoxDecoration(
                                   color: Colors.grey[50],
-                                  borderRadius: BorderRadius.circular(15),
+                                  borderRadius: BorderRadius.circular(s(15)),
                                   border: Border.all(color: Colors.grey[200]!),
                                 ),
                                 child: Column(
                                   children: [
-                                    const Row(
+                                    Row(
                                       children: [
-                                        Expanded(flex: 3, child: Text("품명", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18))),
-                                        Expanded(flex: 1, child: Text("수량", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18))),
-                                        Expanded(flex: 2, child: Text("금액", textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18))),
+                                        Expanded(
+                                          flex: 3,
+                                          child: Text(
+                                            "품명",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w900,
+                                              fontSize: sp(18),
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 1,
+                                          child: Text(
+                                            "수량",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w900,
+                                              fontSize: sp(18),
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 2,
+                                          child: Text(
+                                            "금액",
+                                            textAlign: TextAlign.right,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w900,
+                                              fontSize: sp(18),
+                                            ),
+                                          ),
+                                        ),
                                       ],
                                     ),
                                     const Divider(height: 20),
                                     ...selectedProducts.map((p) {
                                       return Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 6),
+                                        padding: EdgeInsets.symmetric(vertical: s(5)),
                                         child: Row(
                                           children: [
-                                            Expanded(flex: 3, child: Text(p.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500))),
-                                            Expanded(flex: 1, child: Text("${vm.getQuantity(p.productNumber)}개", textAlign: TextAlign.center, style: const TextStyle(fontSize: 18, color: Colors.grey))),
-                                            Expanded(flex: 2, child: Text("${AppFormat.won(vm.getTotalPriceWithDiscount(p.productNumber))}원", textAlign: TextAlign.right, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900))),
+                                            Expanded(
+                                              flex: 3,
+                                              child: Text(
+                                                p.name,
+                                                style: TextStyle(
+                                                  fontSize: sp(20),
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 1,
+                                              child: Text(
+                                                "${vm.getQuantity(p.productNumber)}개",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontSize: sp(20),
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 2,
+                                              child: Text(
+                                                "${AppFormat.won(vm.getTotalPriceWithDiscount(p.productNumber))}원",
+                                                textAlign: TextAlign.right,
+                                                style: TextStyle(
+                                                  fontSize: sp(20),
+                                                  fontWeight: FontWeight.w900,
+                                                ),
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       );
                                     }),
-                                    const Divider(height: 30),
+                                    SizedBox(height: s(8)),
+                                    const Divider(height: 20),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        const Text("최종 합계", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24)),
-                                        Text("${AppFormat.won(finalTotal)}원", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 30, color: AppColors.mainColor)),
+                                        Text(
+                                          "최종 합계",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: sp(24),
+                                          ),
+                                        ),
+                                        Text(
+                                          "${AppFormat.won(finalTotal)}원",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: sp(28),
+                                            color: AppColors.mainColor,
+                                          ),
+                                        ),
                                       ],
                                     )
                                   ],
                                 ),
                               ),
                               if (!isCardPayment) ...[
-                                const SizedBox(height: 25),
+                                SizedBox(height: s(14)),
                                 Visibility(
                                   visible: !isAccountTransfer,
                                   child: TextField(
@@ -546,12 +798,12 @@ class _ProductPageState extends State<ProductPage> {
                                         setDialogState(() {
                                           cashController.text = totalAmount.toString();
                                         });
-                                      });
+                                      }, s, sp);
                                     },
                                     focusNode: cashFocusNode,
                                     textAlign: TextAlign.left,
                                     style: TextStyle(
-                                      fontSize: 30,
+                                      fontSize: sp(28),
                                       fontWeight: FontWeight.w900,
                                       color: Colors.black,
                                     ),
@@ -562,52 +814,67 @@ class _ProductPageState extends State<ProductPage> {
                                       hintText: "클릭하여 현금을 입력하세요.",
                                       hintStyle: TextStyle(
                                         color: Colors.grey[400],
-                                        fontSize: 20,
+                                        fontSize: sp(24),
                                         fontWeight: FontWeight.normal,
                                       ),
                                       fillColor: Colors.white,
                                       labelStyle: TextStyle(
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 20,
-                                          color: cashFocusNode.hasFocus
-                                              ? AppColors.mainColor
-                                              : AppColors.mainDarkColor
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: sp(24),
+                                        color: cashFocusNode.hasFocus
+                                            ? AppColors.mainColor
+                                            : AppColors.mainDarkColor,
                                       ),
                                       suffixText: cashController.text.isEmpty ? "" : " 원",
-                                      suffixStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                                      suffixStyle: TextStyle(
+                                        fontSize: sp(30),
+                                        fontWeight: FontWeight.w900,
+                                      ),
                                       focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                              color: AppColors.mainColor,
-                                              width: 3),
-                                          borderRadius: BorderRadius.circular(15)),
+                                        borderSide: BorderSide(
+                                          color: AppColors.mainColor,
+                                          width: s(3),
+                                        ),
+                                        borderRadius: BorderRadius.circular(s(15)),
+                                      ),
                                       enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                              color: AppColors.mainColor,
-                                              width: 2),
-                                          borderRadius: BorderRadius.circular(15)),
+                                        borderSide: BorderSide(
+                                          color: AppColors.mainColor,
+                                          width: s(2),
+                                        ),
+                                        borderRadius: BorderRadius.circular(s(15)),
+                                      ),
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 10),
+                                SizedBox(height: s(10)),
                                 Visibility(
                                   visible: !isAccountTransfer,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      const Text("거스름 돈", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.grey)),
+                                      Text(
+                                        "거스름 돈",
+                                        style: TextStyle(
+                                          fontSize: sp(30),
+                                          fontWeight: FontWeight.w900,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
                                       Text(
                                         "${change < 0 ? 0 : AppFormat.won(change)} 원",
                                         style: TextStyle(
-                                            fontSize: 35,
-                                            fontWeight: FontWeight.w900,
-                                            color: change >= 0
-                                                ? AppColors.mainColor
-                                                : Colors.grey),
+                                          fontSize: sp(35),
+                                          fontWeight: FontWeight.w900,
+                                          color: change >= 0
+                                              ? AppColors.mainColor
+                                              : Colors.grey,
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
-                                const SizedBox(height: 15),
+                                SizedBox(height: s(20)),
                                 InkWell(
                                   onTap: () {
                                     setDialogState(() {
@@ -618,23 +885,30 @@ class _ProductPageState extends State<ProductPage> {
                                       }
                                     });
                                   },
-                                  borderRadius: BorderRadius.circular(15),
+                                  borderRadius: BorderRadius.circular(s(15)),
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 200),
-                                    padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                                    padding: EdgeInsets.symmetric(vertical: s(18), horizontal: s(16)),
                                     decoration: BoxDecoration(
                                       color: (isAccountTransfer)
                                           ? AppColors.mainColor
                                           : Colors.grey[100],
-                                      borderRadius: BorderRadius.circular(15),
+                                      borderRadius: BorderRadius.circular(s(15)),
                                       border: Border.all(
                                         color: (isAccountTransfer)
                                             ? AppColors.mainColor
                                             : Colors.grey[400]!,
-                                        width: 2.5,
+                                        width: s(2.5),
                                       ),
                                       boxShadow: (isAccountTransfer)
-                                          ? [BoxShadow(color: AppColors.mainColor.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 4))]
+                                          ? [
+                                        BoxShadow(
+                                          color: AppColors.mainColor
+                                              .withOpacity(0.4),
+                                          blurRadius: s(10),
+                                          offset: Offset(0, s(4)),
+                                        )
+                                      ]
                                           : [],
                                     ),
                                     child: Row(
@@ -643,10 +917,12 @@ class _ProductPageState extends State<ProductPage> {
                                           (isAccountTransfer)
                                               ? Icons.check_circle_rounded
                                               : Icons.account_balance_wallet_outlined,
-                                          color: (isAccountTransfer) ? Colors.white : AppColors.mainColor,
-                                          size: 30,
+                                          color: (isAccountTransfer)
+                                              ? Colors.white
+                                              : AppColors.mainColor,
+                                          size: s(30),
                                         ),
-                                        const SizedBox(width: 15),
+                                        SizedBox(width: s(12)),
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -654,15 +930,17 @@ class _ProductPageState extends State<ProductPage> {
                                               Text(
                                                 "계좌 이체로 결제하기",
                                                 style: TextStyle(
-                                                  fontSize: 20,
+                                                  fontSize: sp(24),
                                                   fontWeight: FontWeight.w900,
-                                                  color: (isAccountTransfer) ? Colors.white : Colors.black87,
+                                                  color: (isAccountTransfer)
+                                                      ? Colors.white
+                                                      : Colors.black87,
                                                 ),
                                               ),
                                               Text(
                                                 "상품 금액이 자동으로 입력됩니다",
                                                 style: TextStyle(
-                                                  fontSize: 14,
+                                                  fontSize: sp(18),
                                                   color: (isAccountTransfer)
                                                       ? Colors.white.withOpacity(0.8)
                                                       : Colors.grey[600],
@@ -675,23 +953,21 @@ class _ProductPageState extends State<ProductPage> {
                                     ),
                                   ),
                                 ),
-
                               ],
-                              const SizedBox(height: 20),
+                              SizedBox(height: s(12)),
                             ],
                           ),
                         ),
                       ),
-
-                      const SizedBox(height: 10),
+                      SizedBox(height: s(10)),
                       SizedBox(
                         width: double.infinity,
-                        height: 65,
+                        height: s(65),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.mainColor,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15)),
+                                borderRadius: BorderRadius.circular(s(15))),
                             elevation: 5,
                           ),
                           onPressed: (!isCardPayment && change < 0)
@@ -700,19 +976,22 @@ class _ProductPageState extends State<ProductPage> {
                             await vm.saveSelection(isCardPayment);
                             vm.clearQuantities();
                             if (context.mounted) {
-                              context.read<SalesHistoryViewModel>().loadHistory();
+                              context
+                                  .read<SalesHistoryViewModel>()
+                                  .loadHistory();
                               Navigator.pop(context);
-                              CommonSnackBar.show(context, message: "결제가 정상적으로 완료되었습니다.");
+                              CommonSnackBar.show(context,
+                                  message: "결제가 정상적으로 완료되었습니다.");
                             }
                           },
                           child: Text(
-                              (!isCardPayment && change < 0)
-                                  ? "금액 부족"
-                                  : "결제 완료 및 저장",
-                              style: const TextStyle(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white)),
+                            (!isCardPayment && change < 0) ? "금액 부족" : "결제 완료 및 저장",
+                            style: TextStyle(
+                              fontSize: sp(26),
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -726,7 +1005,12 @@ class _ProductPageState extends State<ProductPage> {
     );
   }
 
-  void _showCashInputPad(BuildContext context, Function(int) onConfirm) {
+  void _showCashInputPad(
+      BuildContext context,
+      Function(int) onConfirm,
+      double Function(double) s,
+      double Function(double) sp,
+      ) {
     int currentTotal = 0;
 
     final List<Map<String, dynamic>> cashUnits = [
@@ -745,27 +1029,39 @@ class _ProductPageState extends State<ProductPage> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setPadState) {
+            final w = MediaQuery.of(context).size.width;
+
             return Dialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(s(25))),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   maxHeight: MediaQuery.of(context).size.height * 0.9,
-                  maxWidth: 650,
+                  maxWidth: math.min(w * 0.95, s(800)),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(s(18)),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text("현금 입력 패드", style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900)),
+                          Text(
+                            "현금 입력 패드",
+                            style: TextStyle(
+                              fontSize: sp(28),
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
                           IconButton(
-                            icon: const Icon(Icons.refresh_rounded, color: Colors.orange, size: 35),
+                            icon: Icon(Icons.refresh_rounded,
+                                color: Colors.orange, size: s(50)),
                             onPressed: () => setPadState(() {
                               currentTotal = 0;
-                              for (var unit in cashUnits) { unit['count'] = 0; }
+                              for (var unit in cashUnits) {
+                                unit['count'] = 0;
+                              }
                             }),
                           ),
                         ],
@@ -773,29 +1069,34 @@ class _ProductPageState extends State<ProductPage> {
                       const Divider(height: 20),
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
+                        padding: EdgeInsets.symmetric(
+                            vertical: s(12), horizontal: s(18)),
                         decoration: BoxDecoration(
                           color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(s(15)),
                           border: Border.all(color: Colors.grey[300]!),
                         ),
                         child: Text(
-                          "${currentTotal.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} 원",
+                          "${currentTotal.toString().replaceAllMapped(RegExp(r'(\\d{1,3})(?=(\\d{3})+(?!\\d))'), (Match m) => '${m[1]},')} 원",
                           textAlign: TextAlign.right,
-                          style: TextStyle(fontSize: 35, fontWeight: FontWeight.w900, color: AppColors.mainColor),
+                          style: TextStyle(
+                            fontSize: sp(35),
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.mainColor,
+                          ),
                         ),
                       ),
-
-                      const SizedBox(height: 15),
+                      SizedBox(height: s(12)),
                       Flexible(
                         child: SingleChildScrollView(
                           child: GridView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 4,
-                              mainAxisSpacing: 12,
-                              crossAxisSpacing: 12,
+                            gridDelegate:
+                            SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: w < 420 ? 3 : 4,
+                              mainAxisSpacing: s(12),
+                              crossAxisSpacing: s(12),
                               childAspectRatio: 0.8,
                             ),
                             itemCount: cashUnits.length,
@@ -803,55 +1104,71 @@ class _ProductPageState extends State<ProductPage> {
                               int count = cashUnits[index]['count'];
                               return Material(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(15),
+                                borderRadius: BorderRadius.circular(s(15)),
                                 elevation: 2,
                                 child: InkWell(
                                   onTap: () {
                                     setPadState(() {
-                                      currentTotal += cashUnits[index]['value'] as int;
+                                      currentTotal +=
+                                      cashUnits[index]['value'] as int;
                                       cashUnits[index]['count'] += 1;
                                     });
                                   },
-                                  borderRadius: BorderRadius.circular(15),
-                                  splashColor: AppColors.mainColor.withOpacity(0.3),
+                                  borderRadius: BorderRadius.circular(s(15)),
+                                  splashColor:
+                                  AppColors.mainColor.withOpacity(0.3),
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(15),
+                                      borderRadius:
+                                      BorderRadius.circular(s(15)),
                                       border: Border.all(
-                                        color: count > 0 ? AppColors.mainColor : Colors.grey[300]!,
-                                        width: count > 0 ? 2 : 1,
+                                        color: count > 0
+                                            ? AppColors.mainColor
+                                            : Colors.grey[300]!,
+                                        width: count > 0 ? s(2) : s(1),
                                       ),
                                     ),
                                     child: Column(
                                       children: [
                                         Expanded(
                                           child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
+                                            padding: EdgeInsets.all(s(8)),
                                             child: Image.asset(
                                               "assets/image/${cashUnits[index]['img']}",
                                               fit: BoxFit.contain,
-                                              errorBuilder: (context, error, stackTrace) =>
-                                              const Icon(Icons.monetization_on, size: 40, color: Colors.grey),
+                                              errorBuilder:
+                                                  (context, error, stackTrace) =>
+                                                  Icon(
+                                                    Icons.monetization_on,
+                                                    size: s(34),
+                                                    color: Colors.grey,
+                                                  ),
                                             ),
                                           ),
                                         ),
                                         Container(
                                           width: double.infinity,
-                                          height: 30,
+                                          height: s(30),
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(
-                                            color: count > 0 ? AppColors.mainColor : Colors.grey[100],
-                                            borderRadius: const BorderRadius.only(
-                                              bottomLeft: Radius.circular(12),
-                                              bottomRight: Radius.circular(12),
+                                            color: count > 0
+                                                ? AppColors.mainColor
+                                                : Colors.grey[100],
+                                            borderRadius: BorderRadius.only(
+                                              bottomLeft:
+                                              Radius.circular(s(12)),
+                                              bottomRight:
+                                              Radius.circular(s(12)),
                                             ),
                                           ),
                                           child: Text(
                                             "$count 개",
                                             style: TextStyle(
-                                              fontSize: 14,
+                                              fontSize: sp(18),
                                               fontWeight: FontWeight.w900,
-                                              color: count > 0 ? Colors.white : Colors.grey[700],
+                                              color: count > 0
+                                                  ? Colors.white
+                                                  : Colors.grey[700],
                                             ),
                                           ),
                                         ),
@@ -864,33 +1181,49 @@ class _ProductPageState extends State<ProductPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: s(20)),
                       Row(
                         children: [
                           Expanded(
                             child: OutlinedButton(
                               style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 15),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                padding: EdgeInsets.symmetric(vertical: s(15)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(s(15)),
+                                ),
                               ),
                               onPressed: () => Navigator.pop(context),
-                              child: const Text("취소", style: TextStyle(fontSize: 20, color: Colors.grey)),
+                              child: Text(
+                                "취소",
+                                style: TextStyle(
+                                  fontSize: sp(24),
+                                  color: Colors.grey,
+                                ),
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 15),
+                          SizedBox(width: s(12)),
                           Expanded(
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.mainColor,
-                                padding: const EdgeInsets.symmetric(vertical: 15),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                padding: EdgeInsets.symmetric(vertical: s(15)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(s(15)),
+                                ),
                               ),
                               onPressed: () {
                                 onConfirm(currentTotal);
                                 Navigator.pop(context);
                               },
-                              child: const Text("금액 적용",
-                                  style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.w900)),
+                              child: Text(
+                                "금액 적용",
+                                style: TextStyle(
+                                  fontSize: sp(24),
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
                             ),
                           ),
                         ],

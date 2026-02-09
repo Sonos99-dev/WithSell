@@ -64,7 +64,6 @@ class ProductModel {
     };
   }
 
-  // 🔥 Model → Firestore
   Map<String, dynamic> toMap() => toJson();
 
   ProductModel copyWith({

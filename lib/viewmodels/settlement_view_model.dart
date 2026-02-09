@@ -9,7 +9,7 @@ import 'package:uuid/uuid.dart';
 
 class SettlementViewModel extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final SharedPreferences _prefs;
+  late SharedPreferences _prefs;
 
   String? _myUuid;
   String? get myUuid => _myUuid;
@@ -35,19 +35,18 @@ class SettlementViewModel extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  SettlementViewModel(this._prefs);
+  SettlementViewModel();
 
-  Future<void> init(List<dynamic> localHistory) async {
+  Future<void> init(SharedPreferences prefs, List<dynamic> localHistory) async {
+    _prefs = prefs;
     _myUuid = _prefs.getString('user_uuid');
     if (_myUuid == null) {
       _myUuid = const Uuid().v4();
       await _prefs.setString('user_uuid', _myUuid!);
     }
 
-    // 1. 기기 선택 초기화
     _selectedDeviceId = "all";
 
-    // 2. 로컬 캐시 로드
     final String? cachedJson = _prefs.getString('cached_all_settlements');
     if (cachedJson != null) {
       try {
@@ -58,12 +57,8 @@ class SettlementViewModel extends ChangeNotifier {
       }
     }
 
-    // 3. 내 로컬 데이터 업데이트 (여기서 _allDevicesData에 내 데이터가 들어감)
     updateMyLocalData(localHistory);
 
-    // 4. 🔥 날짜 설정:
-    // SalesHistoryViewModel에 이미 정렬된 날짜가 있으므로
-    // 탭 이동 시에는 그곳의 데이터를 참조하는 것이 가장 정확합니다.
     if (localHistory.isNotEmpty) {
       List<String> allDates = localHistory.map((item) {
         return DateFormat('yyyy-MM-dd').format(DateTime.parse(item['date']));
@@ -132,17 +127,14 @@ class SettlementViewModel extends ChangeNotifier {
 
     _allDevicesData[_myUuid!] = SettlementModel(uuid: _myUuid!, dailyData: dailyMap);
     _saveToLocal();
-    // notifyListeners()는 필요에 따라 외부에서 호출하거나 여기서 호출
   }
 
-  // 클라우드와 동기화 (SettlementPage에서 호출됨)
   Future<void> syncWithCloud(List<dynamic> localHistory) async {
     _isLoading = true;
     notifyListeners();
     try {
       updateMyLocalData(localHistory);
 
-      // 내 데이터 업로드
       await _firestore
           .collection('settlements')
           .doc(_myUuid)
@@ -178,7 +170,6 @@ class SettlementViewModel extends ChangeNotifier {
     await _prefs.setString('cached_all_settlements', encoded);
   }
 
-  // 🔥 UI에서 사용하는 필터링된 요약 데이터 계산
   Map<String, dynamic> getFilteredSummary() {
     int total = 0, card = 0, cash = 0;
     Map<String, int> products = {};
@@ -187,7 +178,6 @@ class SettlementViewModel extends ChangeNotifier {
     if (_selectedDate == null) return {'total': 0, 'card': 0, 'cash': 0, 'products': {}, 'productAmounts': {}};
 
     _allDevicesData.forEach((uuid, model) {
-      // 'all'이거나 선택된 기기 ID와 일치할 때만 합산
       if (_selectedDeviceId == "all" || _selectedDeviceId == uuid) {
         final daily = model.dailyData[_selectedDate];
         if (daily != null) {

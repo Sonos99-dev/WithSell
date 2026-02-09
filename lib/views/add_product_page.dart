@@ -46,7 +46,7 @@ class _AddProductPageState extends State<AddProductPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA), // 밝은 회색 배경
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         title: Text(isEditing ? "상품 정보 수정" : "새 상품 등록",
             style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
@@ -94,7 +94,6 @@ class _AddProductPageState extends State<AddProductPage> {
     );
   }
 
-  // 흰색 카드 배경
   Widget _buildInputCard(List<Widget> children) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -171,7 +170,6 @@ class _AddProductPageState extends State<AddProductPage> {
     );
   }
 
-  // 문장 안에 들어갈 작은 텍스트 필드 빌더
   Widget _buildInlineField(TextEditingController controller, String hint, double width) {
     return SizedBox(
       width: width,

@@ -49,8 +49,7 @@ class AdminViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  // 상품 추가
+  
   Future<void> addProduct({
     required String name,
     required int price,

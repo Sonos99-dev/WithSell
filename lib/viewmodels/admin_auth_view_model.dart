@@ -1,16 +1,20 @@
-// lib/viewmodels/admin_auth_view_model.dart
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AdminAuthViewModel extends ChangeNotifier {
-  static const String _pwKey = "admin_password";
-  String _currentPassword;
+  late SharedPreferences _prefs;
+  String _password = "0000";
 
-  AdminAuthViewModel(this._currentPassword);
-  String get currentPassword => _currentPassword;
+  AdminAuthViewModel();
+
+  Future<void> init(SharedPreferences prefs) async {
+    _prefs = prefs;
+    _password = _prefs.getString("admin_password") ?? "0000";
+    notifyListeners();
+  }
 
   bool checkPassword(String input) {
-    return _currentPassword == input.trim();
+    return _password == input.trim();
   }
 
   Future<bool> updatePassword(String newPw, String confirmPw) async {
@@ -22,8 +26,8 @@ class AdminAuthViewModel extends ChangeNotifier {
     }
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_pwKey, trimmedNew);
-    _currentPassword = trimmedNew;
+    await prefs.setString("admin_password", trimmedNew);
+    _password = trimmedNew;
     notifyListeners();
     return true;
   }

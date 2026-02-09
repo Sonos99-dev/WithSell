@@ -68,7 +68,6 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
     });
   }
 
-  // 🔥 통합 동기화 로직
   Future<void> _handleSync(SettlementViewModel vm, List<dynamic> history, {required bool isManual}) async {
     if (_isOverlayLoading) return;
 
@@ -96,17 +95,16 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
     }
   }
 
-  // 🔥 중앙 오버레이 (상단 버튼 클릭 시에만 중앙 아이콘 표시, 리프레시 때는 터치만 차단)
   Widget _buildSyncLoadingOverlay() {
     if (!_isOverlayLoading) return const SizedBox.shrink();
 
     return Positioned.fill(
       child: AbsorbPointer(
-        absorbing: true, // 모든 터치 이벤트 차단 (상단 버튼 및 리스트 조작 불가)
+        absorbing: true,
         child: Container(
-          color: Colors.black.withOpacity(0.02), // 아주 살짝 어둡게 하여 터치 차단 시각화
+          color: Colors.black.withOpacity(0.02),
           child: _isManualSync
-              ? Center( // 🔥 상단 버튼 클릭 시에만 중앙 로딩 아이콘 표시
+              ? Center(
             child: Container(
               width: 50,
               height: 50,
@@ -164,7 +162,6 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
                 child: RefreshIndicator(
                   color: AppColors.mainColor,
                   backgroundColor: Colors.white,
-                  // 🔥 당겨서 새로고침 할 때 isManual을 false로 전달
                   onRefresh: () => _handleSync(settlementVm, historyVm.history, isManual: false),
                   child: ListView(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -426,13 +423,11 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
   }
 
   Widget _buildCompactProductTable(Map<String, dynamic> summary) {
-    // getFilteredSummary에서 넘겨받은 데이터
     final products = Map<String, int>.from(summary['products'] ?? {});
     final productAmounts = Map<String, int>.from(summary['productAmounts'] ?? {});
 
     if (products.isEmpty) return _buildEmptyBox("데이터가 없습니다.");
 
-    // 수량 많은 순 정렬
     final sortedEntries = products.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
@@ -480,8 +475,8 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
   Widget _buildCompactDeviceTable(SettlementViewModel vm) {
     final devices = vm.allDevicesData.values.toList();
     devices.sort((a, b) {
-      if (a.uuid == vm.myUuid) return -1; // a가 내 기기면 앞으로
-      if (b.uuid == vm.myUuid) return 1;  // b가 내 기기면 뒤로
+      if (a.uuid == vm.myUuid) return -1;
+      if (b.uuid == vm.myUuid) return 1;
       return 0;
     });
 
@@ -512,10 +507,7 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
     );
   }
 
-  // lib/views/settlement_page.dart 의 _buildDropdown 부분 수정
-
   Widget _buildDropdown(String? value, List<String> items, Function(String?) onChanged, IconData icon) {
-    // 1. 목록이 비어있을 경우 (해당 기기에 데이터가 아예 없는 날짜 등)
     if (items.isEmpty) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -533,8 +525,6 @@ class _SettlementPageState extends State<SettlementPage> with SingleTickerProvid
       );
     }
 
-    // 2. 🔥 중요: 현재 선택된 날짜(value)가 새롭게 필터링된 목록(items)에 포함되어 있는지 확인
-    // 기기를 바꿨을 때 이전 기기의 날짜가 현재 기기에 없을 경우 items.first(가장 최신 날짜)를 보여줍니다.
     final String? effectiveValue = (value != null && items.contains(value)) ? value : items.first;
 
     return Container(

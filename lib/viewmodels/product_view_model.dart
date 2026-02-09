@@ -47,7 +47,6 @@ class ProductViewModel extends ChangeNotifier {
     final dq = p.discountQuantity; // 예: 3
     final dp = p.discountPrice;    // 예: 1000
 
-    // 할인 조건 없거나 잘못된 값 방어
     if (dq <= 0 || dp <= 0) return baseTotal;
 
     final discountCount = qty ~/ dq;

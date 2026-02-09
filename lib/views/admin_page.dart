@@ -71,7 +71,7 @@ class _AdminPageState extends State<AdminPage> {
         child: Column(
           children: [
             const Text(
-              "withSell v1.0.0",
+              "withSell v1.0.1",
               style: TextStyle(color: Colors.grey, fontSize: 13),
             ),
             TextButton.icon(
@@ -79,7 +79,7 @@ class _AdminPageState extends State<AdminPage> {
                 showLicensePage(
                   context: context,
                   applicationName: 'withSell',
-                  applicationVersion: '1.0.0',
+                  applicationVersion: '1.0.1',
                   applicationLegalese: '© 2026 withSell. All rights reserved.',
                 );
               },
