@@ -354,7 +354,7 @@ class _ProductPageState extends State<ProductPage> {
                                 SizedBox(height: 7,),
 
                                 Container(
-                                  height: s(56),
+                                  height: s(60),
                                   decoration: BoxDecoration(
                                     color: Colors.grey[100],
                                     borderRadius:
@@ -377,7 +377,7 @@ class _ProductPageState extends State<ProductPage> {
                                       ),
                                       Padding(
                                         padding: EdgeInsets.symmetric(
-                                            horizontal: s(15)),
+                                            horizontal: s(16)),
                                         child: Text(
                                           "$quantity",
                                           style: TextStyle(
@@ -442,7 +442,7 @@ class _ProductPageState extends State<ProductPage> {
       VoidCallback onPressed,
       double Function(double) s,
       ) {
-    final btnSize = s(56);     // 터치/시각 크기
+    final btnSize = s(60);     // 터치/시각 크기
     final radius = s(14);
 
     return Material(
@@ -459,7 +459,7 @@ class _ProductPageState extends State<ProductPage> {
               borderRadius: BorderRadius.circular(radius),
             ),
             child: Center(
-              child: Icon(icon, color: color, size: s(28)),
+              child: Icon(icon, color: color, size: s(40)),
             ),
           ),
         ),
