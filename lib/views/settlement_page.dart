@@ -6,6 +6,7 @@ import 'package:project/viewmodels/sales_history_view_model.dart';
 import 'package:project/viewmodels/settlement_view_model.dart';
 import 'package:project/views/app_color.dart';
 import 'package:project/views/common_snack_bar.dart';
+import 'package:project/views/sales_history_base_dialog.dart';
 import 'package:provider/provider.dart';
 
 class SettlementPage extends StatefulWidget {
@@ -21,7 +22,7 @@ class _SettlementPageState extends State<SettlementPage>
   late AnimationController _animationController;
   late Animation<double> _expandAnimation;
 
-  bool _isOverlayLoading = false; // 로딩 상태 (상단 버튼 차단 및 오버레이용)
+  bool _isOverlayLoading = false;
   bool _isManualSync = false; // 상단 버튼을 눌렀을 때만 중앙 아이콘을 띄우기 위한 플래그
 
   final List<Color> _productColors = [
@@ -150,56 +151,277 @@ class _SettlementPageState extends State<SettlementPage>
     final authorCtrl = TextEditingController(text: existing?.author ?? "");
     final contentCtrl = TextEditingController(text: existing?.content ?? "");
 
-    await showDialog(
+    final formKey = GlobalKey<FormState>();
+
+    await showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (_) {
-        return AlertDialog(
-          title: Text(
-            existing == null ? "판매 소감 등록" : "판매 소감 재작성",
-            style: const TextStyle(fontWeight: FontWeight.w900),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("선택 날짜: $date", style: const TextStyle(fontWeight: FontWeight.w800)),
-                const SizedBox(height: 12),
-                TextField(controller: locationCtrl, decoration: const InputDecoration(labelText: "판매 장소")),
-                TextField(controller: authorCtrl, decoration: const InputDecoration(labelText: "작성자")),
-                TextField(
-                  controller: contentCtrl,
-                  decoration: const InputDecoration(labelText: "판매 소감"),
-                  maxLines: 5,
+        final viewInsets = MediaQuery.of(context).viewInsets.bottom;
+        final screenH = MediaQuery.of(context).size.height;
+
+        InputDecoration _dec({
+          required String label,
+          required IconData icon,
+          String? hint,
+        }) {
+          return InputDecoration(
+            labelText: label,
+            hintText: hint,
+            labelStyle: TextStyle(
+              color: Colors.grey.shade700,   // 기본 라벨 색
+              fontWeight: FontWeight.w800,
+            ),
+
+            floatingLabelStyle: const TextStyle(
+              color: AppColors.mainColor,    // 포커스/활성 시 라벨 색
+              fontWeight: FontWeight.w900,
+            ),
+            prefixIcon: Icon(icon, size: 20, color: AppColors.mainColor),
+            filled: true,
+            fillColor: const Color(0xFFF3F4F6),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppColors.mainColor, width: 1.4),
+            ),
+          );
+        }
+
+        String? _requiredValidator(String? v) {
+          if (v == null || v.trim().isEmpty) return "필수 입력입니다.";
+          return null;
+        }
+
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: viewInsets),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                // ✅ 위로 띄우는 정도 (숫자 줄이면 더 위로)
+                padding: const EdgeInsets.only(top: 300),
+                child: SizedBox(
+                  // ✅ “다이얼로그처럼” 중앙에 뜨는 높이
+                  height: screenH * 0.5,
+                  child: Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(22)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 18,
+                          offset: Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Form(
+                      key: formKey,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 10),
+
+                          // 상단 핸들
+                          Container(
+                            width: 44,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          // 헤더
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 18),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.mainColor.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.edit_note_rounded,
+                                    color: AppColors.mainColor,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        existing == null ? "판매 소감 작성" : "판매 소감 재작성",
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        "선택 날짜: $date",
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  icon: const Icon(Icons.close_rounded),
+                                  color: Colors.grey.shade700,
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+                          Divider(height: 1, color: Colors.grey.shade200),
+
+                          // ✅ 스크롤 영역 (키보드 올라와도 안정)
+                          Expanded(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
+                              child: Column(
+                                children: [
+                                  TextFormField(
+                                    controller: locationCtrl,
+                                    textInputAction: TextInputAction.next,
+                                    validator: _requiredValidator,
+                                    decoration: _dec(
+                                      label: "판매 장소",
+                                      icon: Icons.place_rounded,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextFormField(
+                                    controller: authorCtrl,
+                                    textInputAction: TextInputAction.next,
+                                    validator: _requiredValidator,
+                                    decoration: _dec(
+                                      label: "작성자",
+                                      icon: Icons.person_rounded,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextFormField(
+                                    controller: contentCtrl,
+                                    minLines: 6,
+                                    maxLines: 10,
+                                    validator: _requiredValidator,
+                                    decoration: _dec(
+                                      label: "판매 소감",
+                                      icon: Icons.chat_bubble_rounded,
+                                      hint: "오늘 판매 분위기, 느낀 점 등을 자유롭게 적어주세요.",
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          // 하단 버튼 영역 (고정)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      side: BorderSide(color: Colors.grey.shade300),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      "취소",
+                                      style: TextStyle(fontWeight: FontWeight.w900, color: Colors.grey),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      final ok = formKey.currentState?.validate() ?? false;
+                                      if (!ok) return;
+
+                                      try {
+                                        await vm.upsertMyReview(
+                                          location: locationCtrl.text,
+                                          author: authorCtrl.text,
+                                          content: contentCtrl.text,
+                                        );
+                                        if (context.mounted) Navigator.pop(context);
+                                        if (context.mounted) {
+                                          CommonSnackBar.show(
+                                            context,
+                                            message: existing == null
+                                                ? "소감이 등록되었습니다."
+                                                : "소감이 수정되었습니다.",
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          CommonSnackBar.show(
+                                            context,
+                                            message: "실패: $e",
+                                            isError: true,
+                                          );
+                                        }
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.mainColor,
+                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      elevation: 0,
+                                    ),
+                                    child: Text(
+                                      existing == null ? "등록" : "수정",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-              ],
+              ),
             ),
           ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text("취소")),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  await vm.upsertMyReview(
-                    location: locationCtrl.text,
-                    author: authorCtrl.text,
-                    content: contentCtrl.text,
-                  );
-                  if (context.mounted) Navigator.pop(context);
-                  if (context.mounted) {
-                    CommonSnackBar.show(
-                      context,
-                      message: existing == null ? "소감이 등록되었습니다." : "소감이 수정되었습니다.",
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    CommonSnackBar.show(context, message: "실패: $e", isError: true);
-                  }
-                }
-              },
-              child: Text(existing == null ? "등록" : "수정"),
-            ),
-          ],
         );
       },
     );
@@ -212,18 +434,19 @@ class _SettlementPageState extends State<SettlementPage>
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("판매 소감 삭제", style: TextStyle(fontWeight: FontWeight.w900)),
-        content: Text("$date 소감을 삭제할까요?\n삭제하면 복구할 수 없습니다."),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("취소")),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text("삭제"),
-          ),
-        ],
-      ),
+      builder: (_) => SalesHistoryBaseDialog(
+          title: "판매 소감 삭제",
+          content: "$date 소감을 삭제할까요?\n삭제하면 복구할 수 없습니다.",
+          icon: Icons.delete_sweep_rounded,
+          iconColor: Colors.redAccent,
+          subTextColor: Colors.red[300]!,
+          isDangerDialog: true,
+          onConfirm: () async {
+            if (context.mounted) {
+              Navigator.pop(context, true);
+            }
+          }
+      )
     );
 
     if (confirmed != true) return;
@@ -252,13 +475,13 @@ class _SettlementPageState extends State<SettlementPage>
       appBar: AppBar(
         title: const Text("정산 기록",
             style: TextStyle(
-                color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20)),
+                color: Colors.white, fontWeight: FontWeight.w900, fontSize: 24)),
         backgroundColor: AppColors.mainColor,
         centerTitle: true,
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.sync_rounded, color: Colors.white),
+            icon: const Icon(Icons.sync_rounded, color: Colors.white, size: 32,),
             // 로딩 중에는 버튼 클릭 방지
             onPressed: _isOverlayLoading
                 ? null
@@ -271,15 +494,21 @@ class _SettlementPageState extends State<SettlementPage>
 
       // ✅ FAB 추가 (추가)
       floatingActionButton: settlementVm.isCurrentDeviceSelected
-          ? FloatingActionButton.extended(
-        backgroundColor: AppColors.mainColor,
-        icon: const Icon(Icons.edit_note_rounded, color: Colors.white),
-        label: Text(
-          settlementVm.myReviewForSelectedDate == null ? "판매 소감" : "판매 소감 재작성",
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
-        ),
-        onPressed: _isOverlayLoading ? null : () => _openReviewDialog(context),
-      ) : null,
+        ? SizedBox(
+          height: 70,
+          child: FloatingActionButton.extended(
+            extendedPadding: const EdgeInsets.symmetric(horizontal: 30),
+            extendedIconLabelSpacing: 14,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+            backgroundColor: AppColors.mainColor,
+            icon: const Icon(Icons.edit_note_rounded, color: Colors.white, size: 30,),
+            label: Text(
+            settlementVm.myReviewForSelectedDate == null ? "판매 소감 작성" : "판매 소감 재작성",
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 26),
+            ),
+            onPressed: _isOverlayLoading ? null : () => _openReviewDialog(context),
+            ),
+        ) : null,
 
       body: Stack(
         children: [
@@ -372,7 +601,7 @@ class _SettlementPageState extends State<SettlementPage>
                           child: Text(
                             "${r.location} · ${r.author}",
                             style: const TextStyle(
-                              fontSize: 15,
+                              fontSize: 18,
                               fontWeight: FontWeight.w900,
                               color: AppColors.mainColor,
                             ),
@@ -382,7 +611,7 @@ class _SettlementPageState extends State<SettlementPage>
                         Text(
                           "$timeText",
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 14,
                             color: Colors.grey,
                             fontWeight: FontWeight.w700,
                           ),
@@ -393,7 +622,7 @@ class _SettlementPageState extends State<SettlementPage>
                     Text(
                       r.content,
                       style: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 20,
                         fontWeight: FontWeight.w600,
                         color: Colors.black87,
                         height: 1.35,
@@ -540,7 +769,7 @@ class _SettlementPageState extends State<SettlementPage>
         Text(title,
             style: TextStyle(
                 color: Colors.white.withOpacity(0.8),
-                fontSize: 15,
+                fontSize: 20,
                 fontWeight: FontWeight.w900)),
         const SizedBox(height: 10),
         Container(
@@ -650,7 +879,7 @@ class _SettlementPageState extends State<SettlementPage>
               label,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 11,
+                fontSize: 16,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 2,
@@ -665,10 +894,10 @@ class _SettlementPageState extends State<SettlementPage>
       padding: const EdgeInsets.only(bottom: 10, left: 4),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppColors.mainColor),
+          Icon(icon, size: 30, color: AppColors.mainColor),
           const SizedBox(width: 8),
           Text(title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
         ],
       ),
     );
@@ -705,7 +934,7 @@ class _SettlementPageState extends State<SettlementPage>
                 Expanded(
                   flex: 3,
                   child: Text(name,
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                 ),
                 Expanded(
                   flex: 4,
@@ -714,17 +943,17 @@ class _SettlementPageState extends State<SettlementPage>
                     children: [
                       Text("$count개 판매",
                           style: const TextStyle(
-                              fontSize: 15,
+                              fontSize: 18,
                               fontWeight: FontWeight.w900,
                               color: AppColors.mainColor)),
                       const Text(" / ",
                           style: TextStyle(
-                              fontSize: 13,
+                              fontSize: 15,
                               color: Colors.grey,
                               fontWeight: FontWeight.w600)),
                       Text("누적 ${AppFormat.won(totalPay)}원",
                           style: const TextStyle(
-                              fontSize: 15,
+                              fontSize: 18,
                               fontWeight: FontWeight.w900,
                               color: AppColors.mainColor)),
                     ],
@@ -748,7 +977,7 @@ class _SettlementPageState extends State<SettlementPage>
             borderRadius: BorderRadius.circular(10)),
         child: Row(
           children: [
-            Icon(icon, color: Colors.white, size: 14),
+            Icon(icon, color: Colors.white, size: 20),
             const SizedBox(width: 8),
             const Text("데이터 없음",
                 style: TextStyle(
@@ -764,7 +993,7 @@ class _SettlementPageState extends State<SettlementPage>
     (value != null && items.contains(value)) ? value : items.first;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
       decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.15),
           borderRadius: BorderRadius.circular(10)),
@@ -772,10 +1001,10 @@ class _SettlementPageState extends State<SettlementPage>
         child: DropdownButton<String>(
           value: effectiveValue,
           dropdownColor: AppColors.mainColor,
-          icon: Icon(icon, color: Colors.white, size: 14),
+          icon: Icon(icon, color: Colors.white, size: 25),
           isExpanded: true,
           style: const TextStyle(
-              color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18),
+              color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20),
           items: items.map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
           onChanged: onChanged,
         ),
@@ -788,7 +1017,7 @@ class _SettlementPageState extends State<SettlementPage>
     vm.allDevicesData.keys.where((uuid) => uuid != vm.myUuid).toList();
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
       decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.15),
           borderRadius: BorderRadius.circular(10)),
@@ -796,10 +1025,10 @@ class _SettlementPageState extends State<SettlementPage>
         child: DropdownButton<String>(
           value: vm.selectedDeviceId,
           dropdownColor: AppColors.mainColor,
-          icon: const Icon(Icons.tablet_android, color: Colors.white, size: 14),
+          icon: const Icon(Icons.tablet_android, color: Colors.white, size: 22),
           isExpanded: true,
           style: const TextStyle(
-              color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18),
+              color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20),
           items: [
             const DropdownMenuItem(value: "all", child: Text("전체 통합")),
             DropdownMenuItem(value: vm.myUuid, child: Text("현재 기기 (${vm.myUuid?.substring(0, 8)})")),
@@ -822,7 +1051,7 @@ class _SettlementPageState extends State<SettlementPage>
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
       child: Center(
           child: Text(message,
-              style: const TextStyle(color: Colors.grey, fontSize: 13))),
+              style: const TextStyle(color: Colors.grey, fontSize: 20))),
     );
   }
 }
