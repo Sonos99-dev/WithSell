@@ -84,7 +84,7 @@ class _ProductPageState extends State<ProductPage> {
                       }
 
                       return Padding(
-                        padding: EdgeInsets.only(right: s(10)),
+                        padding: EdgeInsets.only(right: s(15)),
                         child: ChoiceChip(
                           showCheckmark: false,
                           label: Row(
