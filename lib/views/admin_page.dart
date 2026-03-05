@@ -42,19 +42,19 @@ class _AdminPageState extends State<AdminPage> {
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         title: const Text("관리자 모드",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 22)),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 25)),
         backgroundColor: AppColors.mainColor,
         centerTitle: true,
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white, size: 30,),
+            icon: const Icon(Icons.settings, color: Colors.white, size: 35,),
             onPressed: () => _showChangePasswordDialog(context),
             tooltip: '비밀번호 변경',
           ),
           const SizedBox(width: 4),
           IconButton(
-            icon: const Icon(Icons.logout_rounded, color: Colors.white, size: 30,),
+            icon: const Icon(Icons.logout_rounded, color: Colors.white, size: 35,),
             onPressed: () => setState(() => _isAuthenticated = false),
             tooltip: '로그아웃',
           )
@@ -125,9 +125,9 @@ class _AdminPageState extends State<AdminPage> {
   Widget _buildStatItem(String label, String value) {
     return Column(
       children: [
-        Text(label, style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 16)),
+        Text(label, style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 18)),
         const SizedBox(height: 5),
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900)),
+        Text(value, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900)),
       ],
     );
   }
@@ -156,6 +156,7 @@ class _AdminPageState extends State<AdminPage> {
               labelStyle: TextStyle(
                 color: isSelected ? Colors.white : Colors.grey[700],
                 fontWeight: isSelected ? FontWeight.w900 : FontWeight.normal,
+                fontSize: 18
               ),
               selected: isSelected,
               onSelected: (selected) {
@@ -191,7 +192,7 @@ class _AdminPageState extends State<AdminPage> {
               _selectedCategory == ProductCategory.all
                   ? "등록된 상품이 없습니다."
                   : "${_selectedCategory.label} 카테고리에 상품이 없습니다.",
-              style: const TextStyle(fontSize: 18, color: Colors.grey),
+              style: const TextStyle(fontSize: 24, color: Colors.grey),
             ),
           ],
         ),
@@ -247,7 +248,7 @@ class _AdminPageState extends State<AdminPage> {
                     if (isReorderable)
                       const Padding(
                         padding: EdgeInsets.only(right: 12),
-                        child: Icon(Icons.drag_indicator, color: Colors.grey),
+                        child: Icon(Icons.drag_indicator, color: Colors.grey, size: 30),
                       ),
                     Container(
                       width: 55,
@@ -256,7 +257,7 @@ class _AdminPageState extends State<AdminPage> {
                         color: AppColors.mainColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(15),
                       ),
-                      child: Icon(Icons.edit_note_rounded, color: AppColors.mainColor, size: 30),
+                      child: Icon(Icons.edit_note_rounded, color: AppColors.mainColor, size: 40),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -265,15 +266,15 @@ class _AdminPageState extends State<AdminPage> {
                         children: [
                           Row(
                             children: [
-                              Text(p.category.label, style: TextStyle(color: AppColors.mainColor, fontWeight: FontWeight.w900, fontSize: 12)),
+                              Text(p.category.label, style: TextStyle(color: AppColors.mainColor, fontWeight: FontWeight.w900, fontSize: 16)),
                               const SizedBox(width: 8),
                               const Text("•", style: TextStyle(color: Colors.grey)),
                               const SizedBox(width: 8),
-                              Text("No.${p.productNumber}", style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                              Text("No.${p.priority + 1}", style: const TextStyle(color: Colors.grey, fontSize: 14)),
                             ],
                           ),
                           const SizedBox(height: 4),
-                          Text(p.name, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w900)),
+                          Text(p.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
                           const SizedBox(height: 4),
                           Text.rich(
                             TextSpan(
@@ -281,7 +282,7 @@ class _AdminPageState extends State<AdminPage> {
                                 // 1. 기본 가격 정보
                                 TextSpan(
                                   text: "${AppFormat.won(p.price)}원 ",
-                                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                                  style: TextStyle(color: Colors.grey[600], fontSize: 18),
                                 ),
                                 // 2. 할인 정보가 있을 때만 추가 텍스트 표시
                                 if (p.discountQuantity > 0)
@@ -289,7 +290,7 @@ class _AdminPageState extends State<AdminPage> {
                                     text: "(${p.discountQuantity}개 구매 시 ${AppFormat.won(p.discountPrice)}원 할인)",
                                     style: const TextStyle(
                                       color: AppColors.mainColor, // 🔥 원하는 강조 색상으로 변경 가능
-                                      fontSize: 13,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w900, // 약간 더 두껍게 하여 강조
                                     ),
                                   ),
@@ -300,7 +301,7 @@ class _AdminPageState extends State<AdminPage> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
+                      icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 30,),
                       onPressed: () => _showDeleteConfirm(context, vm, p.productNumber, p.name),
                     ),
                   ],
@@ -331,7 +332,7 @@ class _AdminPageState extends State<AdminPage> {
               backgroundColor: Colors.white,
               elevation: 4,
               icon: Icon(Icons.sync_rounded, color: AppColors.mainColor),
-              label: Text("목록 동기화", style: TextStyle(color: AppColors.mainColor, fontWeight: FontWeight.w900, fontSize: 20)),
+              label: Text("목록 동기화", style: TextStyle(color: AppColors.mainColor, fontWeight: FontWeight.w900, fontSize: 24)),
             ),
           ),
           const SizedBox(width: 12),
@@ -343,7 +344,7 @@ class _AdminPageState extends State<AdminPage> {
               backgroundColor: Colors.orangeAccent,
               elevation: 4,
               icon: const Icon(Icons.add_rounded, color: Colors.white),
-              label: const Text("상품 추가", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20)),
+              label: const Text("상품 추가", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 24)),
             ),
           ),
         ],
