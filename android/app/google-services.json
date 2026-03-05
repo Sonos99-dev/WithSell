@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "751462525002",
-    "project_id": "withsell-e55ce",
-    "storage_bucket": "withsell-e55ce.firebasestorage.app"
+    "project_number": "622870068030",
+    "project_id": "withsell-9c78c",
+    "storage_bucket": "withsell-9c78c.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:751462525002:android:5d5f88477f6794adbfdeb3",
+        "mobilesdk_app_id": "1:622870068030:android:c9e1c2ce93536638f14a6f",
         "android_client_info": {
-          "package_name": "com.son.withSell.project"
+          "package_name": "com.saemmool.withSell.project"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCCD2tPOdqCUO8RULUm-SOQVSQPBcBPKAM"
+          "current_key": "AIzaSyAqXRFh9KJuav-n1kB32NRsppXMU4NKazM"
         }
       ],
       "services": {
