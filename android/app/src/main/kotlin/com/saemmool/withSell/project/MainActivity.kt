@@ -1,4 +1,4 @@
-package com.son.withSell.project
+package com.saemmool.withSell.project
 
 import io.flutter.embedding.android.FlutterActivity
 
