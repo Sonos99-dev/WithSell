@@ -54,11 +54,9 @@ flutter_icons:
   adaptive_icon_background: "#FFFFFF"
 
 flutter_native_splash:
-  image: assets/splash/splash_logo.png
-  android: true
+  android: false
   ios: false
-  android_12:
-    image: assets/splash/splash_logo.png
+
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.4
