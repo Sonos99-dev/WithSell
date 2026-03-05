@@ -194,7 +194,7 @@ class _ProductPageState extends State<ProductPage> {
           final childAspectRatio = w < 480 ? 1.8 : (w < 900 ? 1.6 : 2.10);
 
           return GridView.builder(
-            padding: EdgeInsets.fromLTRB(s(12), s(20), s(12), s(110)),
+            padding: EdgeInsets.fromLTRB(s(12), s(20), s(12), s(160)),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
               childAspectRatio: childAspectRatio,
@@ -219,7 +219,7 @@ class _ProductPageState extends State<ProductPage> {
                     color: quantity > 0
                         ? AppColors.mainColor
                         : Colors.transparent,
-                    width: s(3),
+                    width: s(5),
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -273,7 +273,7 @@ class _ProductPageState extends State<ProductPage> {
                             Text(
                               p.name,
                               style: TextStyle(
-                                fontSize: sp(30),
+                                fontSize: sp(32),
                                 fontWeight: FontWeight.w900,
                                 color: quantity > 0
                                     ? AppColors.mainColor
@@ -287,25 +287,81 @@ class _ProductPageState extends State<ProductPage> {
                             Text(
                               "${AppFormat.won(p.price)} 원",
                               style: TextStyle(
-                                fontSize: sp(28),
-                                color: Colors.grey[700],
+                                fontSize: sp(30),
+                                color: Colors.grey[800],
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                             const Spacer(),
-                            Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
+                                if (discountAmount > 0)
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: s(14),
+                                          vertical: s(4)),
+                                      decoration: BoxDecoration(
+                                        color:
+                                        const Color(0xFFFFEFF0),
+                                        borderRadius:
+                                        BorderRadius.circular(999),
+                                      ),
+                                      child: Text(
+                                        "할인 -${AppFormat.won(discountAmount)}원",
+                                        style: TextStyle(
+                                          color: const Color(
+                                              0xFFE5484D),
+                                          fontWeight:
+                                          FontWeight.w800,
+                                          fontSize: sp(17),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    SizedBox(width: s(8)),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.end,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(height: s(2)),
+                                          FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            alignment: Alignment.centerRight,
+                                            child: Text(
+                                              "${AppFormat.won(totalPrice)}원",
+                                              style: TextStyle(
+                                                fontSize: sp(35),
+                                                fontWeight: FontWeight.w900,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                SizedBox(height: 7,),
+
                                 Container(
-                                  height: s(50),
+                                  height: s(56),
                                   decoration: BoxDecoration(
                                     color: Colors.grey[100],
                                     borderRadius:
                                     BorderRadius.circular(s(15)),
                                   ),
                                   child: Row(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       _buildCircularQtyBtn(
                                         Icons.remove,
@@ -321,11 +377,11 @@ class _ProductPageState extends State<ProductPage> {
                                       ),
                                       Padding(
                                         padding: EdgeInsets.symmetric(
-                                            horizontal: s(12)),
+                                            horizontal: s(15)),
                                         child: Text(
                                           "$quantity",
                                           style: TextStyle(
-                                            fontSize: sp(24),
+                                            fontSize: sp(30),
                                             fontWeight: FontWeight.w900,
                                           ),
                                         ),
@@ -337,54 +393,6 @@ class _ProductPageState extends State<ProductPage> {
                                             p.productNumber,
                                             quantity + 1),
                                         s,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(width: s(8)),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.end,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (discountAmount > 0)
-                                        FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          child: Container(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: s(14),
-                                                vertical: s(4)),
-                                            decoration: BoxDecoration(
-                                              color:
-                                              const Color(0xFFFFEFF0),
-                                              borderRadius:
-                                              BorderRadius.circular(999),
-                                            ),
-                                            child: Text(
-                                              "할인 -${AppFormat.won(discountAmount)}원",
-                                              style: TextStyle(
-                                                color: const Color(
-                                                    0xFFE5484D),
-                                                fontWeight:
-                                                FontWeight.w800,
-                                                fontSize: sp(16),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      SizedBox(height: s(2)),
-                                      FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        alignment: Alignment.centerRight,
-                                        child: Text(
-                                          "${AppFormat.won(totalPrice)}원",
-                                          style: TextStyle(
-                                            fontSize: sp(26),
-                                            fontWeight: FontWeight.w900,
-                                            color: Colors.black,
-                                          ),
-                                        ),
                                       ),
                                     ],
                                   ),
@@ -406,21 +414,21 @@ class _ProductPageState extends State<ProductPage> {
         visible: filteredProducts.isNotEmpty && vm.getTotalCartPrice() != 0,
         child: SizedBox(
           width: size.width * 0.95,
-          height: s(100),
+          height: s(120),
           child: FloatingActionButton.extended(
             backgroundColor: const Color(0xFF2E7D32),
-            elevation: 4,
+            elevation: 8,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
             onPressed: () => _showPaymentMethodDialog(context, s, sp),
             label: Text(
               "${AppFormat.won(vm.getTotalCartPrice())}원 결제하기",
               style: TextStyle(
-                fontSize: sp(40),
+                fontSize: sp(45),
                 fontWeight: FontWeight.w900,
                 color: Colors.white,
               ),
             ),
-            icon: Icon(Icons.payment, color: Colors.white, size: s(40)),
+            icon: Icon(Icons.payment, color: Colors.white, size: s(55)),
           ),
         ),
       ),
@@ -434,20 +442,26 @@ class _ProductPageState extends State<ProductPage> {
       VoidCallback onPressed,
       double Function(double) s,
       ) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(s(12)),
-      child: Container(
-        width: s(50),
-        height: double.infinity,
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(s(12)),
-        ),
-        child: Icon(
-          icon,
-          color: color,
-          size: s(35),
+    final btnSize = s(56);     // 터치/시각 크기
+    final radius = s(14);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(radius),
+        child: SizedBox(
+          width: btnSize,
+          height: btnSize,     // ✅ double.infinity 대신 고정
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(radius),
+            ),
+            child: Center(
+              child: Icon(icon, color: color, size: s(28)),
+            ),
+          ),
         ),
       ),
     );
@@ -467,7 +481,7 @@ class _ProductPageState extends State<ProductPage> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(s(25))),
           elevation: 10,
           child: Container(
-            width: math.min(w * 0.92, s(450)),
+            width: math.min(w * 0.92, s(700)),
             padding: EdgeInsets.symmetric(vertical: s(10), horizontal: s(20)),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -475,14 +489,14 @@ class _ProductPageState extends State<ProductPage> {
                 Align(
                   alignment: Alignment.topRight,
                   child: IconButton(
-                    icon: Icon(Icons.close, size: s(28)),
+                    icon: Icon(Icons.close, size: s(50)),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
                 Text(
                   "결제 방법",
                   style: TextStyle(
-                    fontSize: sp(32),
+                    fontSize: sp(40),
                     fontWeight: FontWeight.w900,
                     letterSpacing: -1,
                   ),
@@ -490,9 +504,9 @@ class _ProductPageState extends State<ProductPage> {
                 SizedBox(height: s(8)),
                 Text(
                   "진행하실 결제 수단을 선택해 주세요.",
-                  style: TextStyle(fontSize: sp(18), color: Colors.grey),
+                  style: TextStyle(fontSize: sp(26), color: Colors.grey),
                 ),
-                SizedBox(height: s(18)),
+                SizedBox(height: s(25)),
                 Row(
                   children: [
                     _buildPaymentOption(
@@ -547,14 +561,14 @@ class _ProductPageState extends State<ProductPage> {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          height: s(160),
+          height: s(250),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(s(20)),
-            border: Border.all(color: color.withOpacity(0.2), width: s(2)),
+            border: Border.all(color: color.withOpacity(0.2), width: s(3)),
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(0.1),
+                color: color.withOpacity(0.2),
                 blurRadius: s(10),
                 offset: Offset(0, s(4)),
               )
@@ -563,17 +577,17 @@ class _ProductPageState extends State<ProductPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: s(60), color: color),
+              Icon(icon, size: s(80), color: color),
               SizedBox(height: s(10)),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: sp(20), fontWeight: FontWeight.w900),
+                style: TextStyle(fontSize: sp(26), fontWeight: FontWeight.w900),
               ),
               Text(
                 subtitle,
                 style: TextStyle(
-                  fontSize: sp(14),
+                  fontSize: sp(20),
                   fontWeight: FontWeight.w900,
                   color: color.withOpacity(0.6),
                 ),
@@ -644,12 +658,12 @@ class _ProductPageState extends State<ProductPage> {
                           Text(
                             "결제 영수증 확인",
                             style: TextStyle(
-                              fontSize: sp(30),
+                              fontSize: sp(35),
                               fontWeight: FontWeight.w900,
                             ),
                           ),
                           IconButton(
-                            icon: Icon(Icons.close, size: s(30)),
+                            icon: Icon(Icons.close, size: s(50)),
                             onPressed: () {
                               cashFocusNode.dispose();
                               Navigator.pop(context);
@@ -667,12 +681,12 @@ class _ProductPageState extends State<ProductPage> {
                               Text(
                                 "결제 수단: ${isCardPayment ? '카드 결제 (CARD)' : '현금 결제 (CASH)'}",
                                 style: TextStyle(
-                                  fontSize: sp(20),
+                                  fontSize: sp(26),
                                   color: isCardPayment ? Colors.blue : Colors.orange,
                                   fontWeight: FontWeight.w900,
                                 ),
                               ),
-                              SizedBox(height: s(12)),
+                              SizedBox(height: s(15)),
                               Container(
                                 padding: EdgeInsets.all(s(12)),
                                 decoration: BoxDecoration(
@@ -690,7 +704,7 @@ class _ProductPageState extends State<ProductPage> {
                                             "품명",
                                             style: TextStyle(
                                               fontWeight: FontWeight.w900,
-                                              fontSize: sp(18),
+                                              fontSize: sp(28),
                                             ),
                                           ),
                                         ),
@@ -701,7 +715,7 @@ class _ProductPageState extends State<ProductPage> {
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
                                               fontWeight: FontWeight.w900,
-                                              fontSize: sp(18),
+                                              fontSize: sp(28),
                                             ),
                                           ),
                                         ),
@@ -712,58 +726,63 @@ class _ProductPageState extends State<ProductPage> {
                                             textAlign: TextAlign.right,
                                             style: TextStyle(
                                               fontWeight: FontWeight.w900,
-                                              fontSize: sp(18),
+                                              fontSize: sp(28),
                                             ),
                                           ),
                                         ),
                                       ],
                                     ),
                                     const Divider(height: 20),
+                                    SizedBox(height: 8,),
                                     ...selectedProducts.map((p) {
                                       return Padding(
                                         padding: EdgeInsets.symmetric(vertical: s(5)),
-                                        child: Row(
+                                        child: Column(
                                           children: [
-                                            Expanded(
-                                              flex: 3,
-                                              child: Text(
-                                                p.name,
-                                                style: TextStyle(
-                                                  fontSize: sp(20),
-                                                  fontWeight: FontWeight.w500,
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  flex: 3,
+                                                  child: Text(
+                                                    p.name,
+                                                    style: TextStyle(
+                                                      fontSize: sp(28),
+                                                      fontWeight: FontWeight.w700,
+                                                    ),
+                                                    maxLines: 2,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
                                                 ),
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 1,
-                                              child: Text(
-                                                "${vm.getQuantity(p.productNumber)}개",
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  fontSize: sp(20),
-                                                  color: Colors.grey,
+                                                Expanded(
+                                                  flex: 1,
+                                                  child: Text(
+                                                    "${vm.getQuantity(p.productNumber)}개",
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontSize: sp(28),
+                                                    ),
+                                                  ),
                                                 ),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 2,
-                                              child: Text(
-                                                "${AppFormat.won(vm.getTotalPriceWithDiscount(p.productNumber))}원",
-                                                textAlign: TextAlign.right,
-                                                style: TextStyle(
-                                                  fontSize: sp(20),
-                                                  fontWeight: FontWeight.w900,
+                                                Expanded(
+                                                  flex: 2,
+                                                  child: Text(
+                                                    "${AppFormat.won(vm.getTotalPriceWithDiscount(p.productNumber))}원",
+                                                    textAlign: TextAlign.right,
+                                                    style: TextStyle(
+                                                      fontSize: sp(28),
+                                                      fontWeight: FontWeight.w700,
+                                                    ),
+                                                  ),
                                                 ),
-                                              ),
+                                              ],
                                             ),
+                                            const Divider(thickness: 0.2),
                                           ],
                                         ),
                                       );
                                     }),
-                                    SizedBox(height: s(8)),
                                     const Divider(height: 20),
+                                    SizedBox(height: s(18)),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
@@ -771,14 +790,14 @@ class _ProductPageState extends State<ProductPage> {
                                           "최종 합계",
                                           style: TextStyle(
                                             fontWeight: FontWeight.w900,
-                                            fontSize: sp(24),
+                                            fontSize: sp(35),
                                           ),
                                         ),
                                         Text(
                                           "${AppFormat.won(finalTotal)}원",
                                           style: TextStyle(
                                             fontWeight: FontWeight.w900,
-                                            fontSize: sp(28),
+                                            fontSize: sp(40),
                                             color: AppColors.mainColor,
                                           ),
                                         ),
@@ -804,7 +823,7 @@ class _ProductPageState extends State<ProductPage> {
                                     focusNode: cashFocusNode,
                                     textAlign: TextAlign.left,
                                     style: TextStyle(
-                                      fontSize: sp(28),
+                                      fontSize: sp(40),
                                       fontWeight: FontWeight.w900,
                                       color: Colors.black,
                                     ),
@@ -815,20 +834,20 @@ class _ProductPageState extends State<ProductPage> {
                                       hintText: "클릭하여 현금을 입력하세요.",
                                       hintStyle: TextStyle(
                                         color: Colors.grey[400],
-                                        fontSize: sp(24),
+                                        fontSize: sp(30),
                                         fontWeight: FontWeight.normal,
                                       ),
                                       fillColor: Colors.white,
                                       labelStyle: TextStyle(
                                         fontWeight: FontWeight.w900,
-                                        fontSize: sp(24),
+                                        fontSize: sp(35),
                                         color: cashFocusNode.hasFocus
                                             ? AppColors.mainColor
                                             : AppColors.mainDarkColor,
                                       ),
                                       suffixText: cashController.text.isEmpty ? "" : " 원",
                                       suffixStyle: TextStyle(
-                                        fontSize: sp(30),
+                                        fontSize: sp(40),
                                         fontWeight: FontWeight.w900,
                                       ),
                                       focusedBorder: OutlineInputBorder(
@@ -848,7 +867,7 @@ class _ProductPageState extends State<ProductPage> {
                                     ),
                                   ),
                                 ),
-                                SizedBox(height: s(10)),
+                                SizedBox(height: s(16)),
                                 Visibility(
                                   visible: !isAccountTransfer,
                                   child: Row(
@@ -921,7 +940,7 @@ class _ProductPageState extends State<ProductPage> {
                                           color: (isAccountTransfer)
                                               ? Colors.white
                                               : AppColors.mainColor,
-                                          size: s(30),
+                                          size: s(50),
                                         ),
                                         SizedBox(width: s(12)),
                                         Expanded(
@@ -931,7 +950,7 @@ class _ProductPageState extends State<ProductPage> {
                                               Text(
                                                 "계좌 이체로 결제하기",
                                                 style: TextStyle(
-                                                  fontSize: sp(24),
+                                                  fontSize: sp(30),
                                                   fontWeight: FontWeight.w900,
                                                   color: (isAccountTransfer)
                                                       ? Colors.white
@@ -941,7 +960,7 @@ class _ProductPageState extends State<ProductPage> {
                                               Text(
                                                 "상품 금액이 자동으로 입력됩니다",
                                                 style: TextStyle(
-                                                  fontSize: sp(18),
+                                                  fontSize: sp(22),
                                                   color: (isAccountTransfer)
                                                       ? Colors.white.withOpacity(0.8)
                                                       : Colors.grey[600],
@@ -960,10 +979,10 @@ class _ProductPageState extends State<ProductPage> {
                           ),
                         ),
                       ),
-                      SizedBox(height: s(10)),
+                      SizedBox(height: s(12)),
                       SizedBox(
                         width: double.infinity,
-                        height: s(65),
+                        height: s(90),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.mainColor,
@@ -988,7 +1007,7 @@ class _ProductPageState extends State<ProductPage> {
                           child: Text(
                             (!isCardPayment && change < 0) ? "금액 부족" : "결제 완료 및 저장",
                             style: TextStyle(
-                              fontSize: sp(26),
+                              fontSize: sp(35),
                               fontWeight: FontWeight.w900,
                               color: Colors.white,
                             ),
@@ -1051,13 +1070,13 @@ class _ProductPageState extends State<ProductPage> {
                           Text(
                             "현금 입력 패드",
                             style: TextStyle(
-                              fontSize: sp(28),
+                              fontSize: sp(35),
                               fontWeight: FontWeight.w900,
                             ),
                           ),
                           IconButton(
                             icon: Icon(Icons.refresh_rounded,
-                                color: Colors.orange, size: s(50)),
+                                color: Colors.orange, size: s(70)),
                             onPressed: () => setPadState(() {
                               currentTotal = 0;
                               for (var unit in cashUnits) {
@@ -1081,7 +1100,7 @@ class _ProductPageState extends State<ProductPage> {
                           "${currentTotal.toString().replaceAllMapped(RegExp(r'(\\d{1,3})(?=(\\d{3})+(?!\\d))'), (Match m) => '${m[1]},')} 원",
                           textAlign: TextAlign.right,
                           style: TextStyle(
-                            fontSize: sp(35),
+                            fontSize: sp(45),
                             fontWeight: FontWeight.w900,
                             color: AppColors.mainColor,
                           ),
@@ -1141,7 +1160,7 @@ class _ProductPageState extends State<ProductPage> {
                                                   (context, error, stackTrace) =>
                                                   Icon(
                                                     Icons.monetization_on,
-                                                    size: s(34),
+                                                    size: s(36),
                                                     color: Colors.grey,
                                                   ),
                                             ),
@@ -1149,7 +1168,7 @@ class _ProductPageState extends State<ProductPage> {
                                         ),
                                         Container(
                                           width: double.infinity,
-                                          height: s(30),
+                                          height: s(35),
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(
                                             color: count > 0
@@ -1165,7 +1184,7 @@ class _ProductPageState extends State<ProductPage> {
                                           child: Text(
                                             "$count 개",
                                             style: TextStyle(
-                                              fontSize: sp(18),
+                                              fontSize: sp(24),
                                               fontWeight: FontWeight.w900,
                                               color: count > 0
                                                   ? Colors.white
@@ -1197,7 +1216,7 @@ class _ProductPageState extends State<ProductPage> {
                               child: Text(
                                 "취소",
                                 style: TextStyle(
-                                  fontSize: sp(24),
+                                  fontSize: sp(30),
                                   color: Colors.grey,
                                 ),
                               ),
@@ -1220,7 +1239,7 @@ class _ProductPageState extends State<ProductPage> {
                               child: Text(
                                 "금액 적용",
                                 style: TextStyle(
-                                  fontSize: sp(24),
+                                  fontSize: sp(30),
                                   color: Colors.white,
                                   fontWeight: FontWeight.w900,
                                 ),
