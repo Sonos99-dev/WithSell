@@ -110,19 +110,19 @@ class _MainScreenState extends State<MainScreen> {
             items: const [
               BottomNavigationBarItem(
                 icon: Icon(Icons.list_outlined),
-                label: '상품 목록',
+                label: '상품',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.receipt_long),
-                label: '판매 내역',
+                label: '판매',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.calculate_rounded),
-                label: '정산 기록',
+                label: '정산',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.manage_accounts),
-                label: '관리자 설정',
+                label: '설정',
               ),
             ],
           ),

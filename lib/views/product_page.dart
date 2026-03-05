@@ -26,7 +26,7 @@ class _ProductPageState extends State<ProductPage> {
     final vm = context.watch<ProductViewModel>();
     final filteredProducts = _selectedCategory == ProductCategory.all
         ? vm.products
-        : vm.products.where((p) => p.category == _selectedCategory).toList();
+        : vm.products.where((p) => p.category == _selectedCategory || p.category == ProductCategory.common).toList();
 
     final mq = MediaQuery.of(context);
     final size = mq.size;
@@ -63,7 +63,9 @@ class _ProductPageState extends State<ProductPage> {
                   scrollDirection: Axis.horizontal,
                   padding: EdgeInsets.symmetric(horizontal: s(12)),
                   child: Row(
-                    children: ProductCategory.values.map((category) {
+                    children: ProductCategory.values
+                        .where((c) => c != ProductCategory.common)
+                        .map((category) {
                       final isSelected = _selectedCategory == category;
 
                       int categoryCartCount = 0;
@@ -404,22 +406,21 @@ class _ProductPageState extends State<ProductPage> {
         visible: filteredProducts.isNotEmpty && vm.getTotalCartPrice() != 0,
         child: SizedBox(
           width: size.width * 0.95,
-          height: s(80),
+          height: s(100),
           child: FloatingActionButton.extended(
-            backgroundColor: Colors.orange[700],
+            backgroundColor: const Color(0xFF2E7D32),
             elevation: 4,
-            shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
             onPressed: () => _showPaymentMethodDialog(context, s, sp),
             label: Text(
               "${AppFormat.won(vm.getTotalCartPrice())}원 결제하기",
               style: TextStyle(
-                fontSize: sp(35),
+                fontSize: sp(40),
                 fontWeight: FontWeight.w900,
                 color: Colors.white,
               ),
             ),
-            icon: Icon(Icons.payment, color: Colors.white, size: s(24)),
+            icon: Icon(Icons.payment, color: Colors.white, size: s(40)),
           ),
         ),
       ),

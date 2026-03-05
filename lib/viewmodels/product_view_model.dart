@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:project/models/product_category.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/product_model.dart';
 
@@ -11,6 +12,28 @@ class ProductViewModel extends ChangeNotifier {
 
   /// 데이터 주입 (SyncViewModel로부터 전달받음)
   void setProducts(List<ProductModel> newProducts) {
+    newProducts.sort((a, b) {
+      // 1. 카테고리 고정 순서 정의
+      final Map<ProductCategory, int> categoryWeights = {
+        ProductCategory.noodle: 1,   // 국수
+        ProductCategory.rice: 2,     // 누룽지
+        ProductCategory.gift: 3,     // 선물세트
+        ProductCategory.etc: 4,      // 기타
+        ProductCategory.common: 5,   // 공통
+      };
+
+      int weightA = categoryWeights[a.category] ?? 99;
+      int weightB = categoryWeights[b.category] ?? 99;
+
+      // 카테고리 가중치가 다르면 가중치 순으로 정렬
+      if (weightA != weightB) {
+        return weightA.compareTo(weightB);
+      }
+
+      // 2. 같은 카테고리 내에서는 사용자가 정한 priority 순으로 정렬
+      return a.priority.compareTo(b.priority);
+    });
+
     _products = newProducts;
     _quantities.clear();
     notifyListeners();

@@ -8,6 +8,7 @@ class ProductModel {
   final int productNumber;
   final String imgUrl;
   final ProductCategory category;
+  final int priority;
 
   const ProductModel({
     required this.discountPrice,
@@ -17,6 +18,7 @@ class ProductModel {
     required this.productNumber,
     required this.imgUrl,
     required this.category,
+    this.priority = 0,
   });
 
   //
@@ -32,6 +34,7 @@ class ProductModel {
             (e) => e.name == (data['category'] ?? 'etc'),
         orElse: () => ProductCategory.etc,
       ),
+      priority: data['priority'] ?? 0,
     );
   }
 
@@ -48,6 +51,7 @@ class ProductModel {
             (e) => e.name == (json['category'] ?? 'etc'),
         orElse: () => ProductCategory.etc,
       ),
+      priority: json['priority'] ?? 0,
     );
   }
 
@@ -61,6 +65,7 @@ class ProductModel {
       "productNumber": productNumber,
       "imgUrl": imgUrl,
       "category": category.name,
+      'priority': priority,
     };
   }
 
@@ -75,6 +80,7 @@ class ProductModel {
     String? borderColor,
     String? imgUrl,
     ProductCategory? category,
+    int? priority
   }) {
     return ProductModel(
       discountPrice: discountPrice ?? this.discountPrice,
@@ -83,7 +89,8 @@ class ProductModel {
       price: price ?? this.price,
       productNumber: productNumber ?? this.productNumber,
       imgUrl: imgUrl ?? this.imgUrl,
-      category: category ?? this.category
+      category: category ?? this.category,
+      priority: priority ?? this.priority
     );
   }
 }

@@ -119,4 +119,28 @@ class AdminViewModel extends ChangeNotifier {
       _setLoading(false);
     }
   }
+
+  Future<void> updateProductOrder(List<ProductModel> updatedList) async {
+    _setLoading(true);
+    try {
+      for (int i = 0; i < updatedList.length; i++) {
+        final p = updatedList[i];
+        final updatedProduct = ProductModel(
+          productNumber: p.productNumber,
+          name: p.name,
+          price: p.price,
+          discountPrice: p.discountPrice,
+          discountQuantity: p.discountQuantity,
+          imgUrl: p.imgUrl,
+          category: p.category,
+          priority: i,
+        );
+        await _repo.postProduct(updatedProduct);
+      }
+      // 전체 다시 동기화
+      await syncAndSave();
+    } finally {
+      _setLoading(false);
+    }
+  }
 }

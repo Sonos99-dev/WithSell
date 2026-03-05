@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:project/constants/constants.dart';
 import 'package:project/models/product_category.dart';
+import 'package:project/models/product_model.dart';
 import 'package:project/viewmodels/admin_auth_view_model.dart';
 import 'package:project/viewmodels/admin_view_model.dart';
 import 'package:project/viewmodels/product_view_model.dart';
@@ -177,7 +178,8 @@ class _AdminPageState extends State<AdminPage> {
     );
   }
 
-  Widget _buildProductList(AdminViewModel vm, List<dynamic> filteredList) {
+  // _buildProductList 함수를 아래 내용으로 교체
+  Widget _buildProductList(AdminViewModel vm, List<ProductModel> filteredList) {
     if (filteredList.isEmpty) {
       return Center(
         child: Column(
@@ -196,12 +198,34 @@ class _AdminPageState extends State<AdminPage> {
       );
     }
 
-    return ListView.builder(
+    final bool isReorderable = _selectedCategory != ProductCategory.all;
+
+    return ReorderableListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 5, 16, 120),
       itemCount: filteredList.length,
+      onReorder: (oldIndex, newIndex) async {
+        if (!isReorderable) {
+          CommonSnackBar.show(context, message: "순서 변경은 개별 카테고리 탭에서 가능합니다.", isError: true);
+          return;
+        }
+        if (newIndex > oldIndex) newIndex -= 1;
+
+        final items = List<ProductModel>.from(filteredList);
+        final item = items.removeAt(oldIndex);
+        items.insert(newIndex, item);
+
+        // ViewModel 호출하여 서버에 순서 저장
+        await vm.updateProductOrder(items);
+
+        // 사용자 화면(ProductPage)용 ViewModel에도 즉시 반영
+        if (mounted) {
+          context.read<ProductViewModel>().setProducts(vm.products);
+        }
+      },
       itemBuilder: (context, index) {
         final p = filteredList[index];
         return Container(
+          key: ValueKey(p.productNumber), // Reorderable은 필수
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -219,6 +243,12 @@ class _AdminPageState extends State<AdminPage> {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
+                    // 🔥 드래그 가능할 때만 아이콘 표시
+                    if (isReorderable)
+                      const Padding(
+                        padding: EdgeInsets.only(right: 12),
+                        child: Icon(Icons.drag_indicator, color: Colors.grey),
+                      ),
                     Container(
                       width: 55,
                       height: 55,
@@ -245,11 +275,26 @@ class _AdminPageState extends State<AdminPage> {
                           const SizedBox(height: 4),
                           Text(p.name, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w900)),
                           const SizedBox(height: 4),
-                          Text(
-                            p.discountQuantity > 0
-                                ? "${AppFormat.won(p.price)}원 (${p.discountQuantity}개 구매 시 ${AppFormat.won(p.discountPrice)}원 할인 적용중)"
-                                : "${AppFormat.won(p.price)}원 (할인 없음)",
-                            style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                          Text.rich(
+                            TextSpan(
+                              children: [
+                                // 1. 기본 가격 정보
+                                TextSpan(
+                                  text: "${AppFormat.won(p.price)}원 ",
+                                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                                ),
+                                // 2. 할인 정보가 있을 때만 추가 텍스트 표시
+                                if (p.discountQuantity > 0)
+                                  TextSpan(
+                                    text: "(${p.discountQuantity}개 구매 시 ${AppFormat.won(p.discountPrice)}원 할인)",
+                                    style: const TextStyle(
+                                      color: AppColors.mainColor, // 🔥 원하는 강조 색상으로 변경 가능
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w900, // 약간 더 두껍게 하여 강조
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
                         ],
                       ),

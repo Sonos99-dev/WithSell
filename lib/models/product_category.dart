@@ -3,7 +3,8 @@ enum ProductCategory {
   noodle("국수"),
   rice("누룽지"),
   gift("선물세트"),
-  etc("기타");
+  etc("기타"),
+  common("공통");
 
   final String label;
   const ProductCategory(this.label);
