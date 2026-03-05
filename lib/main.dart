@@ -1,4 +1,3 @@
-import 'package:firebase_app_check/firebase_app_check.dart' show FirebaseAppCheck, AndroidProvider;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -7,9 +6,7 @@ import 'package:project/viewmodels/admin_view_model.dart';
 import 'package:project/viewmodels/sales_history_view_model.dart';
 import 'package:project/viewmodels/settlement_view_model.dart';
 import 'package:project/views/app_initializer.dart';
-import 'package:project/views/main_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'repositories/product_repository.dart';
 import 'services/firestore_service.dart';
