@@ -106,7 +106,7 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ],
             ),
-            unselectedIconTheme: const IconThemeData(size: 24),
+            unselectedIconTheme: const IconThemeData(size: 33),
             items: const [
               BottomNavigationBarItem(
                 icon: Icon(Icons.list_outlined),

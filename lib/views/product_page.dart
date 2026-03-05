@@ -90,22 +90,22 @@ class _ProductPageState extends State<ProductPage> {
                           label: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(category.label, style: TextStyle(fontSize: sp(24)),),
+                              Text(category.label, style: TextStyle(fontSize: sp(28)),),
                               if (categoryCartCount > 0) ...[
-                                SizedBox(width: s(6)),
+                                SizedBox(width: s(10)),
                                 Container(
                                   padding: EdgeInsets.symmetric(
-                                      horizontal: s(8), vertical: s(2)),
+                                      horizontal: s(12), vertical: s(4)),
                                   decoration: BoxDecoration(
                                     color: isSelected
                                         ? AppColors.mainColor
                                         : Colors.redAccent,
-                                    borderRadius: BorderRadius.circular(s(12)),
+                                    borderRadius: BorderRadius.circular(s(20)),
                                   ),
                                   child: Text(
                                     '$categoryCartCount',
                                     style: TextStyle(
-                                      fontSize: sp(16),
+                                      fontSize: sp(20),
                                       fontWeight: FontWeight.w900,
                                       color: Colors.white,
                                     ),
@@ -782,7 +782,6 @@ class _ProductPageState extends State<ProductPage> {
                                       );
                                     }),
                                     const Divider(height: 20),
-                                    SizedBox(height: s(18)),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
@@ -807,7 +806,7 @@ class _ProductPageState extends State<ProductPage> {
                                 ),
                               ),
                               if (!isCardPayment) ...[
-                                SizedBox(height: s(14)),
+                                SizedBox(height: s(20)),
                                 Visibility(
                                   visible: !isAccountTransfer,
                                   child: TextField(
